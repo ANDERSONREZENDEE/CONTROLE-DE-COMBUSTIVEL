@@ -1,0 +1,21 @@
+{
+  "name": "Controle de Frota - WM",
+  "short_name": "Frota WM",
+  "description": "App PWA para registro offline de combustível e peças - Controladoria",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#e0e0e0",
+  "theme_color": "#FF8C00",
+  "icons": [
+    {
+      "src": "icone.jpg.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "icone.jpg.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
