@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Combustível - WM Construções</title>
+    <title>Controle de Frota - WM Construções</title>
     
-    <!-- Configuração para PWA (Funcionamento Offline e Ícone) -->
+    <!-- Configuração PWA -->
     <link rel="manifest" href="manifest.json.txt">
     <link rel="icon" href="icone.jpg.jpg">
     <link rel="apple-touch-icon" href="icone.jpg.jpg">
@@ -14,63 +14,81 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
+        /* Estilo Geral - Fundo Preto na Tela de Senha */
         body { 
             font-family: Arial, sans-serif; 
-            background-color: #e0e0e0; 
+            background-color: #000000; 
             padding: 10px; 
             margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
-        /* Borda metade preta e metade LARANJA */
+
+        /* Borda metade preta e metade LARANJA nos cantos */
         .app-border {
             background: linear-gradient(135deg, #000000 50%, #FF8C00 50%);
             padding: 8px;
             border-radius: 12px;
-            max-width: 500px;
-            margin: 0 auto;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 4px 20px rgba(255, 140, 0, 0.3);
+            box-sizing: border-box;
         }
+
         .container { 
-            background: #fff; 
+            background: #ffffff; 
             padding: 20px; 
             border-radius: 8px; 
         }
+
+        /* Ícone do App na Tela de Login */
+        .app-icon-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .app-icon-header img {
+            width: 90px;
+            height: 90px;
+            border-radius: 18px;
+            object-fit: cover;
+            border: 2px solid #FF8C00;
+        }
+
+        h2 { text-align: center; color: #333; font-size: 17px; text-transform: uppercase; margin-top: 0; }
         
-        /* Logo no topo */
-        .logo-container { text-align: center; margin-bottom: 15px; }
-        .logo-container img { max-width: 150px; height: auto; }
+        .form-group { margin-bottom: 12px; position: relative; }
+        label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 13px; color: #444; }
         
-        h2 { text-align: center; color: #333; font-size: 18px; text-transform: uppercase; }
-        .form-group { margin-bottom: 15px; position: relative; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
         input, select, textarea { 
             width: 100%; 
             padding: 10px; 
             border: 1px solid #ccc; 
             border-radius: 4px; 
             box-sizing: border-box; 
-            transition: all 0.3s ease;
+            font-size: 14px;
         }
-        
-        /* Animação para piscar campos obrigatórios vazios */
+
+        /* Animação para piscar campos obrigatórios */
         @keyframes piscarErro {
-            0% { border-color: #ff0000; box-shadow: 0 0 8px rgba(255, 0, 0, 0.8); background-color: #ffe6e6; }
-            50% { border-color: transparent; box-shadow: none; background-color: #fff; }
-            100% { border-color: #ff0000; box-shadow: 0 0 8px rgba(255, 0, 0, 0.8); background-color: #ffe6e6; }
+            0% { border-color: #ff0000; box-shadow: 0 0 8px rgba(255, 0, 0, 0.6); background-color: #fff0f0; }
+            50% { border-color: #ccc; box-shadow: none; background-color: #fff; }
+            100% { border-color: #ff0000; box-shadow: 0 0 8px rgba(255, 0, 0, 0.6); background-color: #fff0f0; }
         }
-        .erro-piscar {
-            animation: piscarErro 1s infinite;
-        }
+        .erro-piscar { animation: piscarErro 0.8s infinite; }
 
         .btn { 
             width: 100%; 
             padding: 12px; 
-            margin-top: 10px;
+            margin-top: 8px;
             color: white; 
             border: none; 
             border-radius: 4px; 
             cursor: pointer; 
             font-weight: bold; 
             text-transform: uppercase;
+            font-size: 14px;
         }
         .btn-primary { background-color: #0056b3; }
         .btn-success { background-color: #28a745; }
@@ -79,11 +97,12 @@
         .btn-info { background-color: #17a2b8; }
         
         .password-container { position: relative; }
-        .toggle-password { position: absolute; right: 10px; top: 35px; cursor: pointer; color: #666; font-size: 18px; }
+        .toggle-password { position: absolute; right: 10px; top: 32px; cursor: pointer; color: #666; font-size: 18px; }
         .hidden { display: none !important; }
-        input[type="file"] { padding: 5px; background: #f8f9fa; }
         
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
     </style>
 </head>
 <body>
@@ -91,14 +110,13 @@
 <!-- TELA DE LOGIN -->
 <div id="telaLogin" class="app-border">
     <div class="container">
-        <div class="logo-container">
-            <img src="LOGOTIPO.jpg" alt="WM Construções" onerror="this.style.display='none'">
+        <div class="app-icon-header">
+            <img src="icone.jpg.jpg" alt="WM Frota">
         </div>
         <h2>Acesso do Controlador</h2>
         <div class="form-group password-container">
             <label for="senhaAcesso">Senha de Acesso:</label>
             <input type="password" id="senhaAcesso" placeholder="Digite a senha" oninput="handlePasswordInput('senhaAcesso', 'eyeIconLogin')">
-            <!-- Olhinho fechado por padrão, abre ao digitar -->
             <i class="fa-solid fa-eye-slash toggle-password" id="eyeIconLogin" onclick="togglePasswordVisibility('senhaAcesso')"></i>
         </div>
         <button type="button" class="btn btn-primary" onclick="entrarNoApp()">ENTRAR NO SISTEMA</button>
@@ -108,27 +126,27 @@
 <!-- APLICATIVO PRINCIPAL -->
 <div id="telaPrincipal" class="app-border hidden">
     <div class="container" id="areaExportacao">
+        <div style="text-align: center; margin-bottom: 10px;">
+            <img src="LOGOTIPO.jpg" style="max-width: 120px; height: auto;" onerror="this.style.display='none'">
+        </div>
         <h2>CONTROLE DE FROTA E INSUMOS</h2>
         <hr>
-        <!-- Retirado o onsubmit padrão para controlar a validação manual via JS -->
         <form id="formLançamento" novalidate>
-            
             <div class="form-group">
                 <label for="data">Data do Lançamento:</label>
                 <input type="date" id="data" required>
             </div>
 
-            <!-- Dados do Motorista -->
             <div class="form-group">
                 <label for="nomeMotorista">Nome do Motorista:</label>
                 <input type="text" id="nomeMotorista" placeholder="Nome completo" required>
             </div>
+
             <div class="form-group">
                 <label for="cpfMotorista">CPF do Motorista:</label>
                 <input type="text" id="cpfMotorista" placeholder="000.000.000-00" maxlength="14" oninput="aplicarMascaraCPF(this)" required>
             </div>
 
-            <!-- Dados do Veículo -->
             <div class="form-group">
                 <label for="placa">Placa do Veículo:</label>
                 <input type="text" id="placa" placeholder="ABC-1234" maxlength="8" style="text-transform: uppercase;" onblur="buscarVeiculoPorPlaca()" required>
@@ -137,15 +155,14 @@
             <div class="grid-2">
                 <div class="form-group">
                     <label for="modeloVeiculo">Modelo:</label>
-                    <input type="text" id="modeloVeiculo" placeholder="Ex: Caminhão..." required>
+                    <input type="text" id="modeloVeiculo" placeholder="Modelo" required>
                 </div>
                 <div class="form-group">
                     <label for="anoVeiculo">Ano:</label>
-                    <input type="number" id="anoVeiculo" placeholder="Ex: 2020">
+                    <input type="number" id="anoVeiculo" placeholder="Ano">
                 </div>
             </div>
 
-            <!-- Insumos -->
             <div class="form-group">
                 <label for="tipoItem">Tipo de Combustível / Produto:</label>
                 <select id="tipoItem" onchange="verificarTipoItem()" required>
@@ -163,29 +180,29 @@
             </div>
 
             <div class="form-group hidden" id="divDescricaoPeca">
-                <label for="descricaoPeca">Descrição da Peça (Obrigatório para Autopeças):</label>
-                <textarea id="descricaoPeca" rows="2" placeholder="Descreva a peça adquirida..."></textarea>
+                <label for="descricaoPeca">Descrição da Peça:</label>
+                <textarea id="descricaoPeca" rows="2" placeholder="Qual peça foi comprada?"></textarea>
             </div>
 
             <div class="grid-2">
                 <div class="form-group">
-                    <label for="quantidade">Qtd (Litros/Unid):</label>
+                    <label for="quantidade">Qtd (Litros/Un):</label>
                     <input type="number" id="quantidade" step="0.01" oninput="calcularTotal()" required>
                 </div>
                 <div class="form-group">
-                    <label for="valorUnitario">Valor Unitário (R$):</label>
+                    <label for="valorUnitario">Vlr Unitário:</label>
                     <input type="number" id="valorUnitario" step="0.01" oninput="calcularTotal()" required>
                 </div>
             </div>
 
             <div class="form-group">
                 <label for="valorTotal">Valor Total (R$):</label>
-                <input type="number" id="valorTotal" step="0.01" placeholder="Calculado automático" readonly required>
+                <input type="number" id="valorTotal" step="0.01" readonly required style="background: #f9f9f9; font-weight: bold;">
             </div>
 
             <div class="form-group">
                 <label for="cupomFiscal">Nº do Cupom Fiscal:</label>
-                <input type="text" id="cupomFiscal" placeholder="Número da nota/cupom" required>
+                <input type="text" id="cupomFiscal" placeholder="Número da Nota" required>
             </div>
 
             <div class="form-group">
@@ -194,12 +211,12 @@
             </div>
 
             <div class="form-group">
-                <label for="fotoHodo">Foto do Hodômetro/Horímetro (Obrigatório):</label>
+                <label for="fotoHodo">Foto Hodômetro (Obrigatório):</label>
                 <input type="file" id="fotoHodo" accept="image/*" capture="environment" required>
             </div>
 
             <div class="form-group">
-                <label for="fotoCupom">Foto do Cupom Fiscal (Obrigatório):</label>
+                <label for="fotoCupom">Foto Cupom (Obrigatório):</label>
                 <input type="file" id="fotoCupom" accept="image/*" capture="environment" required>
             </div>
 
@@ -214,38 +231,28 @@
 </div>
 
 <script>
-    // Registro do Service Worker para funcionar OFFLINE
+    // Offline Service Worker
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('Service Worker registrado com sucesso (Modo Offline Ativo).'))
-                .catch(err => console.log('Falha ao registrar Service Worker.', err));
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error', err));
         });
     }
 
     let lancamentosSessao = [];
 
-    // Comportamento da Senha (Olho fechado -> Digita -> Olho aberto)
     function handlePasswordInput(inputId, iconId) {
         const input = document.getElementById(inputId);
         const icon = document.getElementById(iconId);
-        
         if (input.value.length > 0) {
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
         } else {
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
         }
     }
 
     function togglePasswordVisibility(inputId) {
         const input = document.getElementById(inputId);
-        if (input.type === "password") {
-            input.type = "text";
-        } else {
-            input.type = "password";
-        }
+        input.type = input.type === "password" ? "text" : "password";
     }
 
     function entrarNoApp() {
@@ -253,153 +260,109 @@
         if (senha.trim() !== "") {
             document.getElementById('telaLogin').classList.add('hidden');
             document.getElementById('telaPrincipal').classList.remove('hidden');
+            document.body.style.backgroundColor = "#e0e0e0"; // Muda fundo ao entrar
             document.getElementById('data').valueAsDate = new Date();
         } else {
-            alert("Por favor, insira a senha do controlador.");
+            alert("Digite a senha do controlador.");
         }
     }
 
-    // Máscara de CPF
     function aplicarMascaraCPF(input) {
-        let value = input.value.replace(/\D/g, "");
-        if (value.length > 3) value = value.replace(/^(\d{3})(\d)/, "$1.$2");
-        if (value.length > 6) value = value.replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3");
-        if (value.length > 9) value = value.replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
-        input.value = value;
+        let v = input.value.replace(/\D/g, "");
+        if (v.length > 3) v = v.replace(/^(\d{3})(\d)/, "$1.$2");
+        if (v.length > 6) v = v.replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3");
+        if (v.length > 9) v = v.replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
+        input.value = v;
     }
 
-    // Função Simulada para buscar veículo por placa (Pode cadastrar a frota aqui)
     function buscarVeiculoPorPlaca() {
         const placa = document.getElementById('placa').value.toUpperCase().replace("-", "");
-        const modeloInput = document.getElementById('modeloVeiculo');
-        const anoInput = document.getElementById('anoVeiculo');
-
-        // SIMULAÇÃO DE FROTA INTERNA (Adicione as placas aqui)
         const frota = {
-            "ABC1234": { modelo: "Caminhão Basculante Volvo", ano: "2020" },
-            "QWE9876": { modelo: "Escavadeira CAT", ano: "2018" },
-            "WMX0001": { modelo: "Fiat Strada CD", ano: "2022" }
+            "ABC1234": { modelo: "Volvo FH 540", ano: "2021" },
+            "WMX2026": { modelo: "Hilux 4x4", ano: "2023" }
         };
-
-        if (placa.length >= 7) {
-            if (frota[placa]) {
-                modeloInput.value = frota[placa].modelo;
-                anoInput.value = frota[placa].ano;
-            } else {
-                // Deixa livre para o controlador digitar manualmente se não achar
-            }
+        if (frota[placa]) {
+            document.getElementById('modeloVeiculo').value = frota[placa].modelo;
+            document.getElementById('anoVeiculo').value = frota[placa].ano;
         }
     }
 
-    // Calcular Valor Total Automático
     function calcularTotal() {
-        const qtd = parseFloat(document.getElementById('quantidade').value) || 0;
-        const vlrUnit = parseFloat(document.getElementById('valorUnitario').value) || 0;
-        document.getElementById('valorTotal').value = (qtd * vlrUnit).toFixed(2);
+        const q = parseFloat(document.getElementById('quantidade').value) || 0;
+        const u = parseFloat(document.getElementById('valorUnitario').value) || 0;
+        document.getElementById('valorTotal').value = (q * u).toFixed(2);
     }
 
     function verificarTipoItem() {
         const tipo = document.getElementById('tipoItem').value;
-        const divDescricao = document.getElementById('divDescricaoPeca');
-        const inputDescricao = document.getElementById('descricaoPeca');
-        
+        const div = document.getElementById('divDescricaoPeca');
+        const txt = document.getElementById('descricaoPeca');
         if (tipo === 'AUTOPECAS') {
-            divDescricao.classList.remove('hidden');
-            inputDescricao.required = true;
+            div.classList.remove('hidden');
+            txt.required = true;
         } else {
-            divDescricao.classList.add('hidden');
-            inputDescricao.required = false;
-            inputDescricao.value = "";
+            div.classList.add('hidden');
+            txt.required = false;
         }
     }
 
-    // Validação com Efeito Piscar e Salvamento
     function validarESalvar() {
         const form = document.getElementById('formLançamento');
-        const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
-        let formValido = true;
+        const obrigatorios = form.querySelectorAll('[required]');
+        let valido = true;
 
-        inputs.forEach(input => {
-            if (!input.value.trim()) {
-                input.classList.add('erro-piscar'); // Aplica a animação
-                formValido = false;
-                
-                // Remove a animação assim que o usuário começar a preencher
-                input.addEventListener('input', function removerErro() {
-                    input.classList.remove('erro-piscar');
-                    input.removeEventListener('input', removerErro);
-                });
+        obrigatorios.forEach(input => {
+            if (!input.value.trim() || (input.type === "file" && input.files.length === 0)) {
+                input.classList.add('erro-piscar');
+                valido = false;
+                input.onclick = () => input.classList.remove('erro-piscar');
             } else {
                 input.classList.remove('erro-piscar');
             }
         });
 
-        if (!formValido) {
-            alert("Atenção! Preencha os campos obrigatórios que estão piscando em vermelho.");
+        if (!valido) {
+            alert("Preencha os itens obrigatórios piscando em vermelho!");
             return;
         }
 
-        // Se estiver válido, procede com o salvamento
-        const lancamento = {
-            data: document.getElementById('data').value,
-            motorista: document.getElementById('nomeMotorista').value,
-            cpf: document.getElementById('cpfMotorista').value,
+        const dados = {
             placa: document.getElementById('placa').value,
-            tipo: document.getElementById('tipoItem').value,
-            cupom: document.getElementById('cupomFiscal').value,
+            motorista: document.getElementById('nomeMotorista').value,
+            item: document.getElementById('tipoItem').value,
             total: document.getElementById('valorTotal').value
         };
 
-        lancamentosSessao.push(lancamento);
-        alert("Lançamento registrado com sucesso!");
-
-        // Limpeza dos campos principais para forçar escolha no próximo
-        document.getElementById('tipoItem').value = "";
-        document.getElementById('quantidade').value = "";
-        document.getElementById('valorUnitario').value = "";
-        document.getElementById('valorTotal').value = "";
-        document.getElementById('cupomFiscal').value = "";
-        document.getElementById('hodometro').value = "";
-        document.getElementById('fotoHodo').value = "";
-        document.getElementById('fotoCupom').value = "";
+        lancamentosSessao.push(dados);
+        alert("Salvo com sucesso!");
+        
+        // Limpeza para evitar duplicidade
+        ["tipoItem", "quantidade", "valorUnitario", "valorTotal", "cupomFiscal", "hodometro", "fotoHodo", "fotoCupom"].forEach(id => {
+            document.getElementById(id).value = "";
+        });
         verificarTipoItem();
     }
 
     function verLancamentos() {
-        if (lancamentosSessao.length === 0) {
-            alert("Nenhum lançamento registrado nesta sessão.");
-            return;
-        }
-        let relatorio = "LANÇAMENTOS SALVOS:\n\n";
-        lancamentosSessao.forEach((item, index) => {
-            relatorio += `${index + 1}. Placa: ${item.placa} - Mot: ${item.motorista} - Item: ${item.tipo} - R$ ${item.total}\n`;
-        });
-        alert(relatorio);
+        if (lancamentosSessao.length === 0) return alert("Nenhum registro.");
+        let txt = "SESSÃO ATUAL:\n\n";
+        lancamentosSessao.forEach((d, i) => txt += `${i+1}. ${d.placa} | ${d.motorista} | R$ ${d.total}\n`);
+        alert(txt);
     }
 
     function gerarPDF() {
-        const elemento = document.getElementById('areaExportacao');
-        const opcoes = {
-            margin:       10,
-            filename:     'Lancamentos_WM.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-        const botoes = elemento.querySelectorAll('button');
-        botoes.forEach(btn => btn.style.display = 'none');
-
-        html2pdf().set(opcoes).from(elemento).save().then(() => {
-            botoes.forEach(btn => btn.style.display = 'block');
-        });
+        const el = document.getElementById('areaExportacao');
+        const btns = el.querySelectorAll('button');
+        btns.forEach(b => b.style.display = 'none');
+        html2pdf().from(el).save().then(() => btns.forEach(b => b.style.display = 'block'));
     }
 
     function sairESalvar() {
-        if(confirm("Deseja realmente sair e bloquear o aplicativo?")) {
+        if(confirm("Deseja sair?")) {
             document.getElementById('senhaAcesso').value = "";
-            handlePasswordInput('senhaAcesso', 'eyeIconLogin');
             document.getElementById('telaPrincipal').classList.add('hidden');
             document.getElementById('telaLogin').classList.remove('hidden');
+            document.body.style.backgroundColor = "#000000";
         }
     }
 </script>
