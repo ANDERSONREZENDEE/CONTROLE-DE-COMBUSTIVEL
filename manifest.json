@@ -1,0 +1,51 @@
+{
+  "name": "APP Funcionário - Controle de Combustível",
+  "short_name": "Combustível",
+  "description": "Controle de Combustível - Funcionários WM",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f7f6",
+  "theme_color": "#1a233a",
+  "icons": [
+    {
+      "src": "ícone_combustível_v1.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "ícone_combustível_v1.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Novo Lançamento",
+      "short_name": "Novo",
+      "description": "Adicionar novo lançamento de combustível",
+      "url": "./index.html",
+      "icons": [
+        {
+          "src": "ícone_combustível_v1.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Ver Lançamentos",
+      "short_name": "Lançamentos",
+      "description": "Acessar relatório de combustível",
+      "url": "./index.html?tela=planilha",
+      "icons": [
+        {
+          "src": "ícone_combustível_v1.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
