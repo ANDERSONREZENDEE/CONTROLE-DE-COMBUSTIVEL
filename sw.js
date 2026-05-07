@@ -1,43 +1,65 @@
-const CACHE_NAME = 'awm-frota-v2'; // Nome do cache atualizado
+const PREFIXO_CACHE = 'combustivel-funcionario-wm-';
+const CACHE_NAME = PREFIXO_CACHE + 'v5';
 
-const urlsToCache = [
+const arquivosParaGuardar = [
   './',
   './index.html',
-  './manifest.json.txt',
-  './icone.jpg.jpg',
+  './manifest.json',
+  './sw.js',
   './LOGOTIPO.jpg',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
+  './controladoria.jpg',
+  './Captura de tela 2026-02-13 132630.jpg',
+  './OLHOABERTO.png',
+  './OLHOFECHADO_V2.png',
+  './icone_combustivel_v1.png'
 ];
 
-self.addEventListener('install', event => {
-  event.waitUntil(
+self.addEventListener('install', evento => {
+  evento.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+      .then(cache => cache.addAll(arquivosParaGuardar))
   );
+  self.skipWaiting();
 });
 
-self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
+self.addEventListener('activate', evento => {
+  evento.waitUntil(
+    caches.keys().then(nomesCaches => {
       return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
+        nomesCaches.map(nomeCache => {
+          if (nomeCache.startsWith(PREFIXO_CACHE) && nomeCache !== CACHE_NAME) {
+            return caches.delete(nomeCache);
           }
         })
       );
     })
   );
+  self.clients.claim();
 });
 
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) return response; // Retorna do cache se estiver sem internet
-        return fetch(event.request);
+self.addEventListener('fetch', evento => {
+  evento.respondWith(
+    caches.match(evento.request, { ignoreSearch: true })
+      .then(respostaCache => {
+        if (respostaCache) return respostaCache;
+
+        return fetch(evento.request).then(respostaRede => {
+          return caches.open(CACHE_NAME).then(cache => {
+            if (
+              evento.request.method === 'GET' &&
+              respostaRede &&
+              respostaRede.status === 200
+            ) {
+              cache.put(evento.request, respostaRede.clone());
+            }
+            return respostaRede;
+          });
+        });
+      })
+      .catch(() => {
+        if (evento.request.mode === 'navigate') {
+          return caches.match('./index.html', { ignoreSearch: true });
+        }
       })
   );
 });
