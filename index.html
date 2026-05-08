@@ -1381,6 +1381,42 @@ button {
 
         /* ===== FIM DO CSS ADICIONADO ===== */
 
+
+        /* Ajuste solicitado: fotos sempre visíveis no relatório/PDF */
+        .fotos-relatorio-box {
+            display: flex !important;
+            gap: 4px !important;
+            justify-content: center !important;
+            align-items: center !important;
+            flex-wrap: wrap !important;
+            min-width: 95px !important;
+        }
+        .foto-item-relatorio {
+            display: inline-flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        .foto-miniatura-relatorio {
+            width: 58px !important;
+            height: 58px !important;
+            object-fit: cover !important;
+            border-radius: 5px !important;
+            border: 1px solid #555 !important;
+            display: block !important;
+            margin: 2px auto !important;
+        }
+        @media print {
+            .foto-miniatura-relatorio {
+                width: 42px !important;
+                height: 42px !important;
+                max-width: 42px !important;
+                max-height: 42px !important;
+                object-fit: cover !important;
+                display: block !important;
+            }
+        }
+
     </style>
 
     <script>
@@ -1487,8 +1523,8 @@ button {
                     <div class="mensagem-erro-campo">Preencha o modelo.</div>
                 </div>
                 <div class="form-group">
-                    <label for="numeroFrota">Nº da Frota</label>
-                    <input type="text" id="numeroFrota" placeholder="Ex: Frota 24 / Equip. 05">
+                    <label for="numeroFrota">Nº da Frota da WM</label>
+                    <input type="text" id="numeroFrota" placeholder="Ex: Frota WM 24 / Equip. 05">
                 </div>
                 <div class="form-group">
                     <label for="anoVeiculo">Ano/Modelo do Veículo</label>
@@ -1508,6 +1544,7 @@ button {
                     <option value="GASOLINA ADITIVADA">Gasolina Aditivada</option>
                     <option value="GASOLINA PREMIUM">Gasolina Premium</option>
                     <option value="ETANOL">Etanol</option>
+                    <option value="ETANOL ADITIVADO">Etanol Aditivado</option>
                     <option value="GNV">GNV</option>
                     <option value="ARLA 32">Arla 32</option>
                     <option value="QUEROSENE">Querosene</option>
@@ -1641,7 +1678,7 @@ button {
                         <th>Placa</th>
                         <th>Status Placa</th>
                         <th>Modelo</th>
-                        <th>Frota</th>
+                        <th>Nº da Frota da WM</th>
                         <th>Ano/Modelo</th>
                         <th>Produto</th>
                         <th>Qtd</th>
@@ -1651,7 +1688,6 @@ button {
                         <th>Valor Líquido</th>
                         <th>Hodômetro</th>
                         <th>Horímetro</th>
-                        <th>Consumo Médio</th>
                         <th>Observação</th>
                         <th>Fotos</th>
                         <th>Ações</th>
@@ -1766,7 +1802,7 @@ button {
 
     function ehItemCombustivel(item) {
         const t = String(item || '').toUpperCase();
-        return ['DIESEL S10','DIESEL S500','DIESEL COMUM','DIESEL ADITIVADO','GASOLINA','GASOLINA COMUM','GASOLINA ADITIVADA','GASOLINA PREMIUM','ETANOL','GNV'].includes(t);
+        return ['DIESEL S10','DIESEL S500','DIESEL COMUM','DIESEL ADITIVADO','GASOLINA','GASOLINA COMUM','GASOLINA ADITIVADA','GASOLINA PREMIUM','ETANOL','ETANOL ADITIVADO','GNV'].includes(t);
     }
 
     function formatarConsumo(consumo) {
@@ -1860,8 +1896,14 @@ button {
         return parseFloat(String(valor).replace(/[^\d.]/g, '')) || 0;
     }
 
-    function formatarMoedaInput(valor) {
+    function truncarDuasCasas(valor) {
         const numero = Number(valor || 0);
+        if (!Number.isFinite(numero)) return 0;
+        return Math.trunc(numero * 100) / 100;
+    }
+
+    function formatarMoedaInput(valor) {
+        const numero = truncarDuasCasas(valor);
         return numero.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
@@ -1901,17 +1943,22 @@ button {
 
     function montarFotosRelatorio(d) {
         const fotos = [];
-        if (d.foto_hodometro_base64) {
-            fotos.push(`<div><img src="${d.foto_hodometro_base64}" class="foto-miniatura-relatorio"><span class="foto-legenda-mini">Hodômetro</span></div>`);
+        const fotoHodo = d.foto_hodometro_base64 || d.fotoHodometroBase64 || d.foto_hodometro || '';
+        const fotoCupom = d.foto_cupom_base64 || d.fotoCupomBase64 || d.foto_cupom || '';
+
+        if (fotoHodo && String(fotoHodo).startsWith('data:image')) {
+            fotos.push(`<div class="foto-item-relatorio"><img src="${fotoHodo}" class="foto-miniatura-relatorio" alt="Foto do hodômetro"><span class="foto-legenda-mini">Hodômetro</span></div>`);
         } else if (d.foto_hodometro_nome) {
-            fotos.push(`<div><span class="foto-legenda-mini">${d.foto_hodometro_nome}</span></div>`);
+            fotos.push(`<div class="foto-item-relatorio"><span class="foto-legenda-mini">${d.foto_hodometro_nome}</span></div>`);
         }
-        if (d.foto_cupom_base64) {
-            fotos.push(`<div><img src="${d.foto_cupom_base64}" class="foto-miniatura-relatorio"><span class="foto-legenda-mini">Cupom</span></div>`);
+
+        if (fotoCupom && String(fotoCupom).startsWith('data:image')) {
+            fotos.push(`<div class="foto-item-relatorio"><img src="${fotoCupom}" class="foto-miniatura-relatorio" alt="Foto do cupom"><span class="foto-legenda-mini">Cupom</span></div>`);
         } else if (d.foto_cupom_nome) {
-            fotos.push(`<div><span class="foto-legenda-mini">${d.foto_cupom_nome}</span></div>`);
+            fotos.push(`<div class="foto-item-relatorio"><span class="foto-legenda-mini">${d.foto_cupom_nome}</span></div>`);
         }
-        return fotos.length ? `<div class="fotos-relatorio-box">${fotos.join('')}</div>` : '';
+
+        return fotos.length ? `<div class="fotos-relatorio-box">${fotos.join('')}</div>` : '<span class="foto-legenda-mini">Sem foto</span>';
     }
 
     function aplicarMascaraMilhar(input) {
@@ -1921,6 +1968,12 @@ button {
             return;
         }
         input.value = v.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    function formatarHodometroComPonto(valor) {
+        let v = String(valor || '').replace(/\D/g, '');
+        if (!v) return '';
+        return v.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
 
     function aplicarMascaraHorimetro(input) {
@@ -3941,9 +3994,9 @@ button {
         // 2) SE NÃO EXISTIR NAS BASES, EXIGE FORMATO REAL DE PLACA PARA CONSULTA EXTERNA
         if (!placaTemFormatoValido(placa)) {
             aplicarClassePlaca('placa-nao-encontrada');
-            obsPlaca.innerHTML = `<span style="color: #6c757d;"><i class="fa-solid fa-triangle-exclamation"></i> Placa não consta na Base de Dados ou Base de Dados 2. Pendente de análise pela Controladoria.</span>`;
+            obsPlaca.innerHTML = `<span style="color: #6c757d;"><i class="fa-solid fa-triangle-exclamation"></i> PLACA EM ANALISE PELA CONTROLADORIA...</span>`;
             box.classList.remove('hidden');
-            box.innerHTML = `<b>Aviso:</b> Placa não consta na Base de Dados ou Base de Dados 2. Pendente de análise pela Controladoria.`;
+            box.innerHTML = `<b>Aviso:</b> PLACA EM ANALISE PELA CONTROLADORIA...`;
             esconderBotaoSolicitarPlacaKobo();
             return;
         }
@@ -3963,9 +4016,9 @@ button {
         }
 
         aplicarClassePlaca('placa-nao-encontrada');
-        obsPlaca.innerHTML = `<span style="color: #6c757d;"><i class="fa-solid fa-circle-xmark"></i> Placa não consta na Base de Dados ou Base de Dados 2. Pendente de análise pela Controladoria.</span>`;
+        obsPlaca.innerHTML = `<span style="color: #6c757d;"><i class="fa-solid fa-circle-xmark"></i> PLACA EM ANALISE PELA CONTROLADORIA...</span>`;
         box.classList.remove('hidden');
-        box.innerHTML = `<b>Aviso:</b> Placa não consta na Base de Dados ou Base de Dados 2. Pendente de análise pela Controladoria.`;
+        box.innerHTML = `<b>Aviso:</b> PLACA EM ANALISE PELA CONTROLADORIA...`;
         esconderBotaoSolicitarPlacaKobo();
     }
 
@@ -3973,8 +4026,9 @@ button {
         const q = numeroQuantidadeParaFloat(document.getElementById('quantidade').value);
         const u = numeroMoedaParaFloat(document.getElementById('valorUnitario').value);
         const desconto = numeroMoedaParaFloat(document.getElementById('desconto') ? document.getElementById('desconto').value : 0);
-        const bruto = q > 0 && u > 0 ? (q * u) : 0;
-        const liquido = Math.max(bruto - desconto, 0);
+        const brutoCalculado = q > 0 && u > 0 ? (q * u) : 0;
+        const bruto = truncarDuasCasas(brutoCalculado);
+        const liquido = truncarDuasCasas(Math.max(bruto - desconto, 0));
         const campoBruto = document.getElementById('valorBruto');
         const campoTotal = document.getElementById('valorTotal');
         if (campoBruto) campoBruto.value = bruto > 0 ? formatarMoedaInput(bruto) : '';
@@ -4040,7 +4094,7 @@ button {
     }
 
     function formatarMoedaBR(valor) {
-        const numero = Number(valor || 0);
+        const numero = truncarDuasCasas(valor);
         return numero.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
@@ -4056,7 +4110,7 @@ button {
         if (campo.classList.contains('placa-base-1')) return 'AZUL - BASE DE DADOS / WM';
         if (campo.classList.contains('placa-base-2')) return 'VERDE - BASE DE DADOS 2 / NÃO WM';
         if (campo.classList.contains('placa-cadastrada-manual')) return 'ROXO - PENDENTE DE ANÁLISE DA CONTROLADORIA';
-        if (campo.classList.contains('placa-nao-encontrada')) return 'PRETA - PLACA NÃO CONSTA NAS BASES / ANÁLISE CONTROLADORIA';
+        if (campo.classList.contains('placa-nao-encontrada')) return 'PLACA EM ANALISE PELA CONTROLADORIA...';
         if (campo.classList.contains('placa-externa')) return 'LARANJA - BASE EXTERNA';
         return 'SEM STATUS';
     }
@@ -4178,7 +4232,7 @@ button {
         if (!corpo) return;
 
         if (!lancamentosSessao.length) {
-            corpo.innerHTML = '<tr><td colspan="22"><b>Nenhum lançamento salvo neste aparelho.</b></td></tr>';
+            corpo.innerHTML = '<tr><td colspan="21"><b>Nenhum lançamento salvo neste aparelho.</b></td></tr>';
             return;
         }
 
@@ -4190,7 +4244,7 @@ button {
                 <td>${d.motorista || ''}</td>
                 <td>${d.cpf || ''}</td>
                 <td>${d.placa || ''}</td>
-                <td style="font-weight:bold; color:${String(d.status_placa || '').includes('AZUL') ? '#0056b3' : String(d.status_placa || '').includes('VERDE') ? '#28a745' : String(d.status_placa || '').includes('PRETA') ? '#000000' : '#4b0082'}">${d.status_placa || ''}</td>
+                <td style="font-weight:bold; color:${String(d.status_placa || '').includes('AZUL') ? '#0056b3' : String(d.status_placa || '').includes('VERDE') ? '#28a745' : String(d.status_placa || '').includes('ANALISE') ? '#000000' : '#4b0082'}">${d.status_placa || ''}</td>
                 <td>${d.modelo || ''}</td>
                 <td>${d.frota || ''}</td>
                 <td>${d.ano || ''}</td>
@@ -4200,9 +4254,8 @@ button {
                 <td>R$ ${d.valorBruto || formatarMoedaBR(numeroQuantidadeParaFloat(d.quantidade) * numeroMoedaParaFloat(d.valorUnitario))}</td>
                 <td>R$ ${d.desconto || '0,00'}</td>
                 <td>R$ ${d.total || ''}</td>
-                <td>${d.hodometro || ''}</td>
+                <td>${formatarHodometroComPonto(d.hodometro)}</td>
                 <td>${d.horimetro || ''}</td>
-                <td>${formatarConsumo(d.consumo_medio)}</td>
                 <td>${d.observacao || ''}</td>
                 <td>${montarFotosRelatorio(d)}</td>
                 <td>
@@ -4419,7 +4472,7 @@ button {
         return {
             margin: 3,
             filename: 'controle-combustivel.pdf',
-            html2canvas: { scale: 2, scrollX: 0, scrollY: 0 },
+            html2canvas: { scale: 2, scrollX: 0, scrollY: 0, useCORS: true, allowTaint: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
