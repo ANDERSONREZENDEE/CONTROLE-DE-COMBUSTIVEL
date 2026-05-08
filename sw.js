@@ -1,4 +1,4 @@
-const CACHE_NAME = 'controle-combustivel-controladoria-v10';
+const CACHE_NAME = 'controle-combustivel-controladoria-v11';
 
 const ARQUIVOS_PARA_CACHE = [
   './',
