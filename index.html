@@ -3994,9 +3994,9 @@ button {
         // 2) SE NÃO EXISTIR NAS BASES, EXIGE FORMATO REAL DE PLACA PARA CONSULTA EXTERNA
         if (!placaTemFormatoValido(placa)) {
             aplicarClassePlaca('placa-nao-encontrada');
-            obsPlaca.innerHTML = `<span style="color: #6c757d;"><i class="fa-solid fa-triangle-exclamation"></i> PLACA EM ANALISE PELA CONTROLADORIA...</span>`;
+            obsPlaca.innerHTML = `<span style="color: #6c757d;"><i class="fa-solid fa-triangle-exclamation"></i> PLACA A SER ANALISADA PELA CONTROLADORIA</span>`;
             box.classList.remove('hidden');
-            box.innerHTML = `<b>Aviso:</b> PLACA EM ANALISE PELA CONTROLADORIA...`;
+            box.innerHTML = `<b>Aviso:</b> PLACA A SER ANALISADA PELA CONTROLADORIA`;
             esconderBotaoSolicitarPlacaKobo();
             return;
         }
@@ -4016,9 +4016,9 @@ button {
         }
 
         aplicarClassePlaca('placa-nao-encontrada');
-        obsPlaca.innerHTML = `<span style="color: #6c757d;"><i class="fa-solid fa-circle-xmark"></i> PLACA EM ANALISE PELA CONTROLADORIA...</span>`;
+        obsPlaca.innerHTML = `<span style="color: #6c757d;"><i class="fa-solid fa-circle-xmark"></i> PLACA A SER ANALISADA PELA CONTROLADORIA</span>`;
         box.classList.remove('hidden');
-        box.innerHTML = `<b>Aviso:</b> PLACA EM ANALISE PELA CONTROLADORIA...`;
+        box.innerHTML = `<b>Aviso:</b> PLACA A SER ANALISADA PELA CONTROLADORIA`;
         esconderBotaoSolicitarPlacaKobo();
     }
 
@@ -4110,7 +4110,7 @@ button {
         if (campo.classList.contains('placa-base-1')) return 'AZUL - BASE DE DADOS / WM';
         if (campo.classList.contains('placa-base-2')) return 'VERDE - BASE DE DADOS 2 / NÃO WM';
         if (campo.classList.contains('placa-cadastrada-manual')) return 'ROXO - PENDENTE DE ANÁLISE DA CONTROLADORIA';
-        if (campo.classList.contains('placa-nao-encontrada')) return 'PLACA EM ANALISE PELA CONTROLADORIA...';
+        if (campo.classList.contains('placa-nao-encontrada')) return 'PLACA A SER ANALISADA PELA CONTROLADORIA';
         if (campo.classList.contains('placa-externa')) return 'LARANJA - BASE EXTERNA';
         return 'SEM STATUS';
     }
@@ -4227,6 +4227,15 @@ button {
         if (valor) valor.textContent = 'R$ ' + formatarMoedaBR(totalGeral);
     }
 
+
+    function normalizarStatusPlacaRelatorio(status) {
+        const texto = String(status || '').trim();
+        if (!texto || texto.toUpperCase().includes('ANALISE') || texto.toUpperCase().includes('ANÁLISE')) {
+            return 'PLACA A SER ANALISADA PELA CONTROLADORIA';
+        }
+        return texto;
+    }
+
     function renderizarTabelaLancamentos() {
         const corpo = document.getElementById('corpoTabelaCombustivel');
         if (!corpo) return;
@@ -4244,7 +4253,7 @@ button {
                 <td>${d.motorista || ''}</td>
                 <td>${d.cpf || ''}</td>
                 <td>${d.placa || ''}</td>
-                <td style="font-weight:bold; color:${String(d.status_placa || '').includes('AZUL') ? '#0056b3' : String(d.status_placa || '').includes('VERDE') ? '#28a745' : String(d.status_placa || '').includes('ANALISE') ? '#000000' : '#4b0082'}">${d.status_placa || ''}</td>
+                <td style="font-weight:bold; color:${String(normalizarStatusPlacaRelatorio(d.status_placa)).includes('AZUL') ? '#0056b3' : String(normalizarStatusPlacaRelatorio(d.status_placa)).includes('VERDE') ? '#28a745' : String(normalizarStatusPlacaRelatorio(d.status_placa)).includes('ANALISADA') ? '#000000' : '#4b0082'}">${normalizarStatusPlacaRelatorio(d.status_placa)}</td>
                 <td>${d.modelo || ''}</td>
                 <td>${d.frota || ''}</td>
                 <td>${d.ano || ''}</td>
