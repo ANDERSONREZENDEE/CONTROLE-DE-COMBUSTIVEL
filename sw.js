@@ -1,5 +1,5 @@
 const PREFIXO_CACHE = 'combustivel-funcionario-wm-';
-const CACHE_NAME = PREFIXO_CACHE + 'v6';
+const CACHE_NAME = PREFIXO_CACHE + 'v7';
 
 const arquivosParaGuardar = [
   './',
