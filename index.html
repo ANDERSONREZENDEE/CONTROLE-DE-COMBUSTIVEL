@@ -765,6 +765,622 @@
             text-align: center;
         }
 
+    
+
+        /* ===== CSS ADICIONADO AO INDEX - CORREÇÃO DO RELATÓRIO/PDF ===== */
+/* =========================================================
+   CORREÇÃO FINAL DO RELATÓRIO DE COMBUSTÍVEL
+   Evita cortar colunas, centraliza tudo e ajusta impressão/PDF
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.relatorio,
+#relatorio,
+.area-relatorio,
+.tela-relatorio,
+#areaRelatorio,
+#relatorioCombustivel {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Cabeçalho do relatório */
+.cabecalho-relatorio,
+.header-relatorio,
+.relatorio-header {
+    width: 100%;
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: 120px 1fr 130px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    margin: 0 auto 10px auto;
+}
+
+.cabecalho-relatorio img,
+.header-relatorio img,
+.relatorio-header img {
+    max-width: 100%;
+    max-height: 75px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+}
+
+.titulo-relatorio,
+.relatorio-titulo,
+#tituloRelatorio {
+    text-align: center;
+    font-weight: bold;
+    color: #003b63;
+    font-size: 18px;
+    line-height: 1.2;
+    margin: 0 auto;
+}
+
+/* Resumo total */
+.resumo-relatorio,
+.total-relatorio,
+#resumoRelatorio {
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    font-size: 15px;
+    margin: 10px auto;
+}
+
+/* Tabela do relatório */
+table,
+.tabela-relatorio,
+#tabelaRelatorio,
+#tabelaCombustivel {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+    margin: 0 auto !important;
+    overflow: hidden !important;
+}
+
+/* Células */
+table th,
+table td,
+.tabela-relatorio th,
+.tabela-relatorio td,
+#tabelaRelatorio th,
+#tabelaRelatorio td,
+#tabelaCombustivel th,
+#tabelaCombustivel td {
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 3px 2px !important;
+    font-size: 7.5px !important;
+    line-height: 1.12 !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    white-space: normal !important;
+    overflow: hidden !important;
+}
+
+/* Cabeçalho da tabela */
+table th,
+.tabela-relatorio th,
+#tabelaRelatorio th,
+#tabelaCombustivel th {
+    background: #003b63 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+    font-size: 7px !important;
+}
+
+/* Fotos dentro da tabela */
+table img,
+.tabela-relatorio img,
+#tabelaRelatorio img,
+#tabelaCombustivel img {
+    max-width: 42px !important;
+    max-height: 55px !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    display: block !important;
+    margin: 0 auto !important;
+    border-radius: 3px;
+}
+
+/* Legenda das fotos */
+.legenda-foto,
+.foto-legenda,
+td small,
+td span {
+    max-width: 100%;
+    font-size: 6.5px !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    display: block;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+}
+
+/* Distribuição das colunas */
+.tabela-relatorio th:nth-child(1),
+.tabela-relatorio td:nth-child(1),
+#tabelaRelatorio th:nth-child(1),
+#tabelaRelatorio td:nth-child(1) {
+    width: 4%;
+}
+
+.tabela-relatorio th:nth-child(2),
+.tabela-relatorio td:nth-child(2),
+#tabelaRelatorio th:nth-child(2),
+#tabelaRelatorio td:nth-child(2) {
+    width: 6%;
+}
+
+.tabela-relatorio th:nth-child(3),
+.tabela-relatorio td:nth-child(3),
+#tabelaRelatorio th:nth-child(3),
+#tabelaRelatorio td:nth-child(3) {
+    width: 5%;
+}
+
+.tabela-relatorio th:nth-child(4),
+.tabela-relatorio td:nth-child(4),
+#tabelaRelatorio th:nth-child(4),
+#tabelaRelatorio td:nth-child(4) {
+    width: 7%;
+}
+
+.tabela-relatorio th:nth-child(5),
+.tabela-relatorio td:nth-child(5),
+#tabelaRelatorio th:nth-child(5),
+#tabelaRelatorio td:nth-child(5) {
+    width: 7%;
+}
+
+.tabela-relatorio th:nth-child(6),
+.tabela-relatorio td:nth-child(6),
+#tabelaRelatorio th:nth-child(6),
+#tabelaRelatorio td:nth-child(6) {
+    width: 6%;
+}
+
+.tabela-relatorio th:nth-child(7),
+.tabela-relatorio td:nth-child(7),
+#tabelaRelatorio th:nth-child(7),
+#tabelaRelatorio td:nth-child(7) {
+    width: 9%;
+}
+
+.tabela-relatorio th:nth-child(8),
+.tabela-relatorio td:nth-child(8),
+#tabelaRelatorio th:nth-child(8),
+#tabelaRelatorio td:nth-child(8) {
+    width: 6%;
+}
+
+.tabela-relatorio th:nth-child(9),
+.tabela-relatorio td:nth-child(9),
+#tabelaRelatorio th:nth-child(9),
+#tabelaRelatorio td:nth-child(9) {
+    width: 5%;
+}
+
+.tabela-relatorio th:nth-child(10),
+.tabela-relatorio td:nth-child(10),
+#tabelaRelatorio th:nth-child(10),
+#tabelaRelatorio td:nth-child(10) {
+    width: 5%;
+}
+
+.tabela-relatorio th:nth-child(11),
+.tabela-relatorio td:nth-child(11),
+#tabelaRelatorio th:nth-child(11),
+#tabelaRelatorio td:nth-child(11) {
+    width: 6%;
+}
+
+.tabela-relatorio th:nth-child(12),
+.tabela-relatorio td:nth-child(12),
+#tabelaRelatorio th:nth-child(12),
+#tabelaRelatorio td:nth-child(12) {
+    width: 5%;
+}
+
+.tabela-relatorio th:nth-child(13),
+.tabela-relatorio td:nth-child(13),
+#tabelaRelatorio th:nth-child(13),
+#tabelaRelatorio td:nth-child(13) {
+    width: 6%;
+}
+
+.tabela-relatorio th:nth-child(14),
+.tabela-relatorio td:nth-child(14),
+#tabelaRelatorio th:nth-child(14),
+#tabelaRelatorio td:nth-child(14) {
+    width: 6%;
+}
+
+.tabela-relatorio th:nth-child(15),
+.tabela-relatorio td:nth-child(15),
+#tabelaRelatorio th:nth-child(15),
+#tabelaRelatorio td:nth-child(15) {
+    width: 6%;
+}
+
+.tabela-relatorio th:nth-child(16),
+.tabela-relatorio td:nth-child(16),
+#tabelaRelatorio th:nth-child(16),
+#tabelaRelatorio td:nth-child(16) {
+    width: 5%;
+}
+
+.tabela-relatorio th:nth-child(17),
+.tabela-relatorio td:nth-child(17),
+#tabelaRelatorio th:nth-child(17),
+#tabelaRelatorio td:nth-child(17) {
+    width: 5%;
+}
+
+.tabela-relatorio th:nth-child(18),
+.tabela-relatorio td:nth-child(18),
+#tabelaRelatorio th:nth-child(18),
+#tabelaRelatorio td:nth-child(18) {
+    width: 5%;
+}
+
+.tabela-relatorio th:nth-child(19),
+.tabela-relatorio td:nth-child(19),
+#tabelaRelatorio th:nth-child(19),
+#tabelaRelatorio td:nth-child(19) {
+    width: 7%;
+}
+
+.tabela-relatorio th:nth-child(20),
+.tabela-relatorio td:nth-child(20),
+#tabelaRelatorio th:nth-child(20),
+#tabelaRelatorio td:nth-child(20) {
+    width: 7%;
+}
+
+/* Botões fora da impressão */
+.no-print,
+.botoes,
+.acoes,
+button {
+    page-break-inside: avoid;
+}
+
+/* =========================================================
+   IMPRESSÃO / SALVAR EM PDF
+   ========================================================= */
+
+@media print {
+    @page {
+        size: A4 landscape;
+        margin: 4mm;
+    }
+
+    html,
+    body {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .no-print,
+    .botoes,
+    .acoes,
+    button,
+    input,
+    select,
+    textarea {
+        display: none !important;
+    }
+
+    .relatorio,
+    #relatorio,
+    .area-relatorio,
+    .tela-relatorio,
+    #areaRelatorio,
+    #relatorioCombustivel {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        page-break-inside: avoid !important;
+    }
+
+    .cabecalho-relatorio,
+    .header-relatorio,
+    .relatorio-header {
+        display: grid !important;
+        grid-template-columns: 100px 1fr 115px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 5px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto 6px auto !important;
+        padding: 0 !important;
+        text-align: center !important;
+    }
+
+    .cabecalho-relatorio img,
+    .header-relatorio img,
+    .relatorio-header img {
+        max-width: 95px !important;
+        max-height: 62px !important;
+        object-fit: contain !important;
+        display: block !important;
+        margin: 0 auto !important;
+    }
+
+    .titulo-relatorio,
+    .relatorio-titulo,
+    #tituloRelatorio {
+        font-size: 13px !important;
+        line-height: 1.1 !important;
+        text-align: center !important;
+        margin: 0 auto !important;
+        color: #003b63 !important;
+    }
+
+    .resumo-relatorio,
+    .total-relatorio,
+    #resumoRelatorio {
+        font-size: 11px !important;
+        text-align: center !important;
+        margin: 5px auto !important;
+    }
+
+    table,
+    .tabela-relatorio,
+    #tabelaRelatorio,
+    #tabelaCombustivel {
+        width: 100% !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+        margin: 0 auto !important;
+        transform: scale(0.93) !important;
+        transform-origin: top center !important;
+        page-break-inside: auto !important;
+    }
+
+    table th,
+    table td,
+    .tabela-relatorio th,
+    .tabela-relatorio td,
+    #tabelaRelatorio th,
+    #tabelaRelatorio td,
+    #tabelaCombustivel th,
+    #tabelaCombustivel td {
+        font-size: 5.8px !important;
+        padding: 2px 1px !important;
+        line-height: 1.02 !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+        word-break: break-word !important;
+        overflow-wrap: anywhere !important;
+        white-space: normal !important;
+        overflow: hidden !important;
+    }
+
+    table th,
+    .tabela-relatorio th,
+    #tabelaRelatorio th,
+    #tabelaCombustivel th {
+        font-size: 5.7px !important;
+        font-weight: bold !important;
+        background: #003b63 !important;
+        color: #ffffff !important;
+    }
+
+    table img,
+    .tabela-relatorio img,
+    #tabelaRelatorio img,
+    #tabelaCombustivel img {
+        max-width: 30px !important;
+        max-height: 38px !important;
+        width: auto !important;
+        height: auto !important;
+        object-fit: contain !important;
+        display: block !important;
+        margin: 0 auto !important;
+    }
+
+    .legenda-foto,
+    .foto-legenda,
+    td small,
+    td span {
+        font-size: 5px !important;
+        line-height: 1 !important;
+        text-align: center !important;
+        display: block !important;
+        word-break: break-word !important;
+        overflow-wrap: anywhere !important;
+    }
+}
+
+/* =========================================================
+   COMPATIBILIDADE COM O INDEX ATUAL DO COMBUSTÍVEL
+   Aplica a correção também aos IDs/classes reais do arquivo.
+   ========================================================= */
+#areaRelatorioCombustivel,
+#telaPlanilhaCombustivel,
+.tabela-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.cabecalho-oficial {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.cabecalho-topo {
+    display: grid !important;
+    grid-template-columns: 120px 1fr 130px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    text-align: center !important;
+}
+
+.img-cabecalho {
+    max-width: 100% !important;
+    max-height: 75px !important;
+    object-fit: contain !important;
+    display: block !important;
+    margin: 0 auto !important;
+}
+
+.texto-cabecalho,
+.texto-cabecalho h3,
+.texto-cabecalho small {
+    text-align: center !important;
+}
+
+#tabela-dados-combustivel {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+    margin: 0 auto !important;
+}
+
+#tabela-dados-combustivel th,
+#tabela-dados-combustivel td {
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 3px 2px !important;
+    font-size: 7.5px !important;
+    line-height: 1.12 !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    white-space: normal !important;
+    overflow: hidden !important;
+}
+
+#tabela-dados-combustivel th {
+    background: #003b63 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+    font-size: 7px !important;
+}
+
+#tabela-dados-combustivel img {
+    max-width: 42px !important;
+    max-height: 55px !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    display: block !important;
+    margin: 0 auto !important;
+    border-radius: 3px !important;
+}
+
+@media print {
+    #areaRelatorioCombustivel,
+    #telaPlanilhaCombustivel,
+    .tabela-container {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .cabecalho-topo {
+        display: grid !important;
+        grid-template-columns: 100px 1fr 115px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 5px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto 6px auto !important;
+        padding: 0 !important;
+        text-align: center !important;
+    }
+
+    .img-cabecalho {
+        max-width: 95px !important;
+        max-height: 62px !important;
+        object-fit: contain !important;
+        display: block !important;
+        margin: 0 auto !important;
+    }
+
+    #tabela-dados-combustivel {
+        width: 100% !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+        margin: 0 auto !important;
+        transform: scale(0.93) !important;
+        transform-origin: top center !important;
+        page-break-inside: auto !important;
+    }
+
+    #tabela-dados-combustivel th,
+    #tabela-dados-combustivel td {
+        font-size: 5.8px !important;
+        padding: 2px 1px !important;
+        line-height: 1.02 !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+        word-break: break-word !important;
+        overflow-wrap: anywhere !important;
+        white-space: normal !important;
+        overflow: hidden !important;
+    }
+
+    #tabela-dados-combustivel th {
+        font-size: 5.7px !important;
+        font-weight: bold !important;
+        background: #003b63 !important;
+        color: #ffffff !important;
+    }
+
+    #tabela-dados-combustivel img {
+        max-width: 30px !important;
+        max-height: 38px !important;
+        width: auto !important;
+        height: auto !important;
+        object-fit: contain !important;
+        display: block !important;
+        margin: 0 auto !important;
+    }
+}
+
+        /* ===== FIM DO CSS ADICIONADO ===== */
+
     </style>
 
     <script>
