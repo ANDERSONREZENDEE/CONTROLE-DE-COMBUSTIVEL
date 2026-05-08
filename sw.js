@@ -1,5 +1,5 @@
 const PREFIXO_CACHE = 'combustivel-funcionario-wm-';
-const CACHE_NAME = PREFIXO_CACHE + 'v7';
+const CACHE_NAME = PREFIXO_CACHE + 'v8';
 
 const arquivosParaGuardar = [
   './',
@@ -10,8 +10,8 @@ const arquivosParaGuardar = [
   './Captura de tela 2026-02-13 132630.jpg',
   './OLHOABERTO.png',
   './OLHOFECHADO_V2.png',
-  './ícone_combustível_v1.png',
-  './imagemdoapp.png'
+  './imagem do app.png',
+  './icone_combustivel_v1.png'
 ];
 
 self.addEventListener('install', evento => {
