@@ -6,9 +6,9 @@
     <title>CONTROLE DE COMBUSTÍVEL</title>
 
     <!-- Configuração PWA -->
-    <link rel="manifest" href="manifest.json?v=8">
-    <link rel="icon" type="image/png" href="imagem%20do%20app.png?v=8">
-    <link rel="apple-touch-icon" href="imagem%20do%20app.png?v=8">
+    <link rel="manifest" href="manifest.json?v=10">
+    <link rel="icon" type="image/png" href="icone_principal_v14.png?v=10">
+    <link rel="apple-touch-icon" href="icone_principal_v14.png?v=10">
     <meta name="theme-color" content="#1a233a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1703,7 +1703,7 @@ button {
     // Configuração PWA Offline
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error', err));
+            navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(err => console.log('SW error', err));
         });
     }
 
