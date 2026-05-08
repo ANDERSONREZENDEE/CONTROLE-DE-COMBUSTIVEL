@@ -3,18 +3,20 @@
   "short_name": "Combustível",
   "description": "Controle de Combustível - Funcionários WM",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#f4f7f6",
   "theme_color": "#1a233a",
   "icons": [
     {
-      "src": "ícone_combustível_v1.png",
+      "src": "imagem%20do%20app.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "ícone_combustível_v1.png",
+      "src": "imagem%20do%20app.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -28,20 +30,20 @@
       "url": "./index.html",
       "icons": [
         {
-          "src": "ícone_combustível_v1.png",
+          "src": "icone_combustivel_v1.png",
           "sizes": "192x192",
           "type": "image/png"
         }
       ]
     },
     {
-      "name": "Ver Lançamentos",
-      "short_name": "Lançamentos",
+      "name": "Ver Planilha",
+      "short_name": "Planilha",
       "description": "Acessar relatório de combustível",
       "url": "./index.html?tela=planilha",
       "icons": [
         {
-          "src": "ícone_combustível_v1.png",
+          "src": "icone_combustivel_v1.png",
           "sizes": "192x192",
           "type": "image/png"
         }
