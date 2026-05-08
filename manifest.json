@@ -35,6 +35,19 @@
           "type": "image/png"
         }
       ]
+    },
+    {
+      "name": "Ver Lançamentos",
+      "short_name": "Planilha",
+      "description": "Acessar a planilha de lançamentos salvos",
+      "url": "./index.html?tela=planilha",
+      "icons": [
+        {
+          "src": "./icone_atalho_v14.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }
