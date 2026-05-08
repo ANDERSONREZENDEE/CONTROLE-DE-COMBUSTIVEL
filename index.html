@@ -6,10 +6,14 @@
     <title>CONTROLE DE COMBUSTÍVEL</title>
 
     <!-- Configuração PWA -->
-    <link rel="manifest" href="manifest.json?v=6">
-    <link rel="icon" type="image/png" href="ícone_combustível_v1.png?v=6">
-    <link rel="apple-touch-icon" href="ícone_combustível_v1.png?v=6">
-    <meta name="theme-color" content="#FF8C00">
+    <link rel="manifest" href="manifest.json?v=8">
+    <link rel="icon" type="image/png" href="imagem%20do%20app.png?v=8">
+    <link rel="apple-touch-icon" href="imagem%20do%20app.png?v=8">
+    <meta name="theme-color" content="#1a233a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Combustível">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -733,9 +737,60 @@
             display: none !important;
         }
 
+    
+        .foto-miniatura-relatorio {
+            width: 52px;
+            height: 52px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            display: block;
+            margin: 2px auto;
+        }
+
+        .fotos-relatorio-box {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            min-width: 120px;
+        }
+
+        .foto-legenda-mini {
+            font-size: 8px;
+            color: #333;
+            font-weight: bold;
+            display: block;
+            text-align: center;
+        }
+
     </style>
+
+    <script>
+        // 🔒 Anti-xereta: bloqueios de inspeção/cópia comuns.
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('selectstart', event => {
+            const tag = (event.target && event.target.tagName || '').toLowerCase();
+            if (!['input', 'textarea', 'select'].includes(tag)) event.preventDefault();
+        });
+        document.addEventListener('dragstart', event => event.preventDefault());
+        document.addEventListener('keydown', function(e) {
+            const k = String(e.key || '').toUpperCase();
+            if (
+                k === 'F12' ||
+                (e.ctrlKey && e.shiftKey && ['I','J','C','K'].includes(k)) ||
+                (e.ctrlKey && ['U','S','P'].includes(k))
+            ) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        });
+    </script>
+
 </head>
-<body>
+<body ondragstart="return false;" ondrop="return false;">
 <div id="bloqueioDesktop" class="bloqueio-desktop">
     <div class="box-bloqueio">
         <h2>ACESSO BLOQUEADO NO COMPUTADOR</h2>
@@ -748,6 +803,7 @@
 <div id="telaLogin" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:9999; display:flex; justify-content:center; align-items:center;">
     <div class="login-box" style="background:white; padding:25px; border-radius:10px; width:85%; max-width:340px; text-align:center; box-shadow:0 4px 15px rgba(0,0,0,0.5);">
         <img src="LOGOTIPO.jpg" alt="Logo WM" style="max-height:70px; max-width:230px; margin-bottom:10px; object-fit:contain;" onerror="this.style.display='none'">
+        <img src="imagem%20do%20app.png" alt="Ícone do App" style="height:72px; width:72px; border-radius:18px; object-fit:cover; display:block; margin:0 auto 10px;" onerror="this.style.display='none'">
         <h3 style="color:#1a233a; margin-top:0; margin-bottom:5px;">ACESSO RESTRITO</h3>
         <p style="color:#666; font-size:13px; margin-bottom:5px;">Área exclusiva para funcionários</p>
 
@@ -870,20 +926,29 @@
             <div class="grid-2">
                 <div class="form-group">
                     <label for="quantidade" class="obrigatorio">Qtd (Litros/Un)</label>
-                    <input type="number" id="quantidade" step="0.01" min="0.01" oninput="calcularTotal()" required>
-                    <div class="mensagem-erro-campo">Informe a quantidade.</div>
+                    <input type="text" id="quantidade" inputmode="decimal" placeholder="0.000" oninput="mascaraQuantidadeTresCasas(this); calcularTotal()" onblur="formatarQuantidadeTresCasas(this)" required>
+                    <div class="mensagem-erro-campo">Informe a quantidade com três casas decimais.</div>
                 </div>
                 <div class="form-group">
                     <label for="valorUnitario" class="obrigatorio">Vlr Unitário</label>
-                    <input type="number" id="valorUnitario" step="0.01" min="0.01" oninput="calcularTotal()" required>
+                    <input type="text" id="valorUnitario" inputmode="decimal" placeholder="0,00" oninput="mascaraMoedaCampo(this); calcularTotal()" required>
                     <div class="mensagem-erro-campo">Informe o valor unitário.</div>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="valorTotal" class="obrigatorio">Valor Total (R$)</label>
-                <input type="number" id="valorTotal" step="0.01" readonly required style="background: #f9f9f9; font-weight: bold; color: #003b73;">
-                <div class="mensagem-erro-campo">O valor total precisa ser calculado.</div>
+                <label for="valorBruto">Valor Bruto (R$)</label>
+                <input type="text" id="valorBruto" readonly style="background: #f9f9f9; font-weight: bold; color: #003b73;">
+            </div>
+
+            <div class="form-group">
+                <label for="desconto">Desconto (R$)</label>
+                <input type="text" id="desconto" inputmode="decimal" placeholder="0,00" oninput="mascaraMoedaCampo(this); calcularTotal()">
+            </div>
+
+            <div class="form-group">
+                <label for="valorTotal">Valor Líquido (R$)</label>
+                <input type="text" id="valorTotal" readonly style="background: #f9f9f9; font-weight: bold; color: #003b73;">
             </div>
 
             <div class="form-group">
@@ -921,7 +986,7 @@
         <div class="area-acoes-combustivel">
             <button type="button" class="btn btn-info" onclick="verLancamentos()"><i class="fa-solid fa-list"></i> VER OS LANÇAMENTOS</button>
             <button type="button" class="btn btn-danger" onclick="sairESalvar()"><i class="fa-solid fa-right-from-bracket"></i> SALVAR E SAIR</button>
-            <button type="button" class="btn btn-success" onclick="compartilharRelatorioWhatsApp()"><i class="fa-solid fa-share-nodes"></i> COMPARTILHAR RELATÓRIO NO WHATSAPP OU TEAMS OU TEAMS</button>
+            <button type="button" class="btn btn-success" onclick="compartilharRelatorioWhatsApp()"><i class="fa-solid fa-share-nodes"></i> COMPARTILHAR RELATÓRIO NO WHATSAPP OU MICROSOFT TEAMS</button>
             <button type="button" class="btn btn-primary" onclick="atualizarApp()"><i class="fa-solid fa-rotate"></i> ATUALIZAR O APP</button>
         </div>
     </div>
@@ -965,11 +1030,14 @@
                         <th>Produto</th>
                         <th>Qtd</th>
                         <th>Vlr Unit.</th>
-                        <th>Total</th>
+                        <th>Valor Bruto</th>
+                        <th>Desconto</th>
+                        <th>Valor Líquido</th>
                         <th>Hodômetro</th>
                         <th>Horímetro</th>
                         <th>Consumo Médio</th>
                         <th>Observação</th>
+                        <th>Fotos</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -1025,9 +1093,10 @@
 
     function ehAcessoPorCelular() {
         const ua = navigator.userAgent || '';
+        const largura = Math.min(window.innerWidth || 9999, screen.width || 9999);
+        const toque = (navigator.maxTouchPoints || 0) > 0;
         const ehMobileUA = /Android|iPhone|iPad|iPod|Windows Phone|Mobile/i.test(ua);
-        const toque = navigator.maxTouchPoints && navigator.maxTouchPoints > 0;
-        return ehMobileUA && toque;
+        return ehMobileUA || (toque && largura <= 900);
     }
 
     function aplicarBloqueioDesktop() {
@@ -1160,6 +1229,74 @@
         input.value = v;
     }
 
+
+
+    function numeroMoedaParaFloat(valor) {
+        if (valor === undefined || valor === null) return 0;
+        const texto = String(valor).replace(/[^\d,.-]/g, '').trim();
+        if (!texto) return 0;
+        if (texto.includes(',')) return parseFloat(texto.replace(/\./g, '').replace(',', '.')) || 0;
+        return parseFloat(texto) || 0;
+    }
+
+    function numeroQuantidadeParaFloat(valor) {
+        if (valor === undefined || valor === null) return 0;
+        return parseFloat(String(valor).replace(/[^\d.]/g, '')) || 0;
+    }
+
+    function formatarMoedaInput(valor) {
+        const numero = Number(valor || 0);
+        return numero.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function mascaraMoedaCampo(input) {
+        let v = String(input.value || '').replace(/\D/g, '');
+        if (!v) {
+            input.value = '';
+            return;
+        }
+        const numero = Number(v) / 100;
+        input.value = formatarMoedaInput(numero);
+    }
+
+    function mascaraQuantidadeTresCasas(input) {
+        let v = String(input.value || '').replace(/[^\d.]/g, '');
+        const partes = v.split('.');
+        if (partes.length > 2) v = partes[0] + '.' + partes.slice(1).join('');
+        const idx = v.indexOf('.');
+        if (idx >= 0) v = v.slice(0, idx + 1) + v.slice(idx + 1).replace(/\./g, '').slice(0, 3);
+        input.value = v;
+    }
+
+    function formatarQuantidadeTresCasas(input) {
+        const n = numeroQuantidadeParaFloat(input.value);
+        input.value = n > 0 ? n.toFixed(3) : '';
+    }
+
+    function fileToDataURL(input) {
+        return new Promise(resolve => {
+            if (!input || !input.files || !input.files[0]) return resolve('');
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result || ''));
+            reader.onerror = () => resolve('');
+            reader.readAsDataURL(input.files[0]);
+        });
+    }
+
+    function montarFotosRelatorio(d) {
+        const fotos = [];
+        if (d.foto_hodometro_base64) {
+            fotos.push(`<div><img src="${d.foto_hodometro_base64}" class="foto-miniatura-relatorio"><span class="foto-legenda-mini">Hodômetro</span></div>`);
+        } else if (d.foto_hodometro_nome) {
+            fotos.push(`<div><span class="foto-legenda-mini">${d.foto_hodometro_nome}</span></div>`);
+        }
+        if (d.foto_cupom_base64) {
+            fotos.push(`<div><img src="${d.foto_cupom_base64}" class="foto-miniatura-relatorio"><span class="foto-legenda-mini">Cupom</span></div>`);
+        } else if (d.foto_cupom_nome) {
+            fotos.push(`<div><span class="foto-legenda-mini">${d.foto_cupom_nome}</span></div>`);
+        }
+        return fotos.length ? `<div class="fotos-relatorio-box">${fotos.join('')}</div>` : '';
+    }
 
     function aplicarMascaraMilhar(input) {
         let v = String(input.value || '').replace(/\D/g, '');
@@ -3217,10 +3354,15 @@
     }
 
     function calcularTotal() {
-        const q = parseFloat(document.getElementById('quantidade').value) || 0;
-        const u = parseFloat(document.getElementById('valorUnitario').value) || 0;
-        document.getElementById('valorTotal').value = q > 0 && u > 0 ? (q * u).toFixed(2) : "";
-        analisarCampoGuiado(document.getElementById('valorTotal'));
+        const q = numeroQuantidadeParaFloat(document.getElementById('quantidade').value);
+        const u = numeroMoedaParaFloat(document.getElementById('valorUnitario').value);
+        const desconto = numeroMoedaParaFloat(document.getElementById('desconto') ? document.getElementById('desconto').value : 0);
+        const bruto = q > 0 && u > 0 ? (q * u) : 0;
+        const liquido = Math.max(bruto - desconto, 0);
+        const campoBruto = document.getElementById('valorBruto');
+        const campoTotal = document.getElementById('valorTotal');
+        if (campoBruto) campoBruto.value = bruto > 0 ? formatarMoedaInput(bruto) : '';
+        if (campoTotal) campoTotal.value = bruto > 0 ? formatarMoedaInput(liquido) : '';
     }
 
     function verificarTipoItem() {
@@ -3314,6 +3456,8 @@
 
         const fotoHodo = document.getElementById('fotoHodo');
         const fotoCupom = document.getElementById('fotoCupom');
+        const fotoHodometroBase64 = await fileToDataURL(fotoHodo);
+        const fotoCupomBase64 = await fileToDataURL(fotoCupom);
         const dados = {
             id_local: `LANC-${Date.now()}`,
             status_envio: 'SALVO_NO_APARELHO',
@@ -3330,12 +3474,16 @@
             descricaoPeca: document.getElementById('descricaoPeca').value,
             quantidade: document.getElementById('quantidade').value,
             valorUnitario: document.getElementById('valorUnitario').value,
+            valorBruto: document.getElementById('valorBruto') ? document.getElementById('valorBruto').value : '',
+            desconto: document.getElementById('desconto') ? document.getElementById('desconto').value : '',
             total: document.getElementById('valorTotal').value,
             hodometro: document.getElementById('hodometro').value,
             horimetro: document.getElementById('horimetro').value,
             observacao: document.getElementById('observacaoLancamento').value,
             foto_hodometro_nome: fotoHodo && fotoHodo.files[0] ? fotoHodo.files[0].name : '',
             foto_cupom_nome: fotoCupom && fotoCupom.files[0] ? fotoCupom.files[0].name : '',
+            foto_hodometro_base64: fotoHodometroBase64,
+            foto_cupom_base64: fotoCupomBase64,
             data_hora_lancamento: new Date().toISOString(),
             data_hora_lancamento_br: formatarDataHoraBR(new Date()),
             identificacao_aparelho: gerarIdAparelhoLocal(),
@@ -3384,7 +3532,7 @@
     function atualizarResumoLancamentos() {
         const totalLista = document.getElementById('totalLancamentosLista');
         const valorLista = document.getElementById('valorTotalLista');
-        const totalGeral = lancamentosSessao.reduce((acc, d) => acc + (parseFloat(d.total) || 0), 0);
+        const totalGeral = lancamentosSessao.reduce((acc, d) => acc + numeroMoedaParaFloat(d.total), 0);
         if (totalLista) totalLista.textContent = String(lancamentosSessao.length);
         if (valorLista) valorLista.textContent = formatarMoedaBR(totalGeral);
     }
@@ -3398,7 +3546,7 @@
     }
 
     function atualizarCabecalhoRelatorio() {
-        const totalGeral = lancamentosSessao.reduce((acc, d) => acc + (parseFloat(d.total) || 0), 0);
+        const totalGeral = lancamentosSessao.reduce((acc, d) => acc + numeroMoedaParaFloat(d.total), 0);
         const data = document.getElementById('printDataEmissao');
         const device = document.getElementById('printDeviceId');
         const total = document.getElementById('printTotalLancamentos');
@@ -3414,7 +3562,7 @@
         if (!corpo) return;
 
         if (!lancamentosSessao.length) {
-            corpo.innerHTML = '<tr><td colspan="19"><b>Nenhum lançamento salvo neste aparelho.</b></td></tr>';
+            corpo.innerHTML = '<tr><td colspan="22"><b>Nenhum lançamento salvo neste aparelho.</b></td></tr>';
             return;
         }
 
@@ -3432,14 +3580,17 @@
                 <td>${d.ano || ''}</td>
                 <td>${d.item || ''}</td>
                 <td>${d.quantidade || ''}</td>
-                <td>R$ ${formatarMoedaBR(d.valorUnitario)}</td>
-                <td>R$ ${formatarMoedaBR(d.total)}</td>
+                <td>R$ ${formatarMoedaBR(numeroMoedaParaFloat(d.valorUnitario))}</td>
+                <td>R$ ${d.valorBruto || formatarMoedaBR(numeroQuantidadeParaFloat(d.quantidade) * numeroMoedaParaFloat(d.valorUnitario))}</td>
+                <td>R$ ${d.desconto || '0,00'}</td>
+                <td>R$ ${d.total || ''}</td>
                 <td>${d.hodometro || ''}</td>
                 <td>${d.horimetro || ''}</td>
                 <td>${formatarConsumo(d.consumo_medio)}</td>
                 <td>${d.observacao || ''}</td>
+                <td>${montarFotosRelatorio(d)}</td>
                 <td>
-                    <button type="button" class="btn btn-warning btn-mini" onclick="recarregarComoNovoLancamento(${i})">Editar/Usar</button>
+                    <button type="button" class="btn btn-warning btn-mini" onclick="recarregarComoNovoLancamento(${i})">Editar</button>
                     <button type="button" class="btn btn-danger btn-mini" onclick="excluirLancamento(${i})">Excluir</button>
                 </td>
             </tr>
@@ -3523,7 +3674,7 @@
 
     function limparFormularioAposEnvio() {
         // Mantém nome e CPF no aparelho do funcionário para facilitar o próximo lançamento dele.
-        ["placa", "modeloVeiculo", "numeroFrota", "anoVeiculo", "tipoItem", "descricaoPeca", "quantidade", "valorUnitario", "valorTotal", "hodometro", "horimetro", "observacaoLancamento", "fotoHodo", "fotoCupom"].forEach(id => {
+        ["placa", "modeloVeiculo", "numeroFrota", "anoVeiculo", "tipoItem", "descricaoPeca", "quantidade", "valorUnitario", "valorBruto", "desconto", "valorTotal", "hodometro", "horimetro", "observacaoLancamento", "fotoHodo", "fotoCupom"].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 el.value = "";
@@ -3554,13 +3705,16 @@
         document.getElementById('tipoItem').value = d.item || '';
         document.getElementById('quantidade').value = d.quantidade || '';
         document.getElementById('valorUnitario').value = d.valorUnitario || '';
+        if (document.getElementById('valorBruto')) document.getElementById('valorBruto').value = d.valorBruto || '';
+        if (document.getElementById('desconto')) document.getElementById('desconto').value = d.desconto || '';
         document.getElementById('valorTotal').value = d.total || '';
         document.getElementById('hodometro').value = d.hodometro || '';
         document.getElementById('horimetro').value = d.horimetro || '';
         document.getElementById('observacaoLancamento').value = d.observacao || '';
         verificarTipoItem();
         buscarVeiculoPorPlaca();
-        alert('Lançamento carregado. Ajuste o que precisar e clique em SALVAR LANÇAMENTO.');
+        voltarParaFormulario();
+        alert('Lançamento carregado para edição. Ajuste o que precisar e clique em SALVAR LANÇAMENTO.');
         document.getElementById('formLancamento').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -3656,8 +3810,8 @@
     }
 
     function ocultarBotoesRelatorio() {
-        const el = document.getElementById('areaExportacao');
-        const btns = el.querySelectorAll('button');
+        const el = document.getElementById('areaRelatorioCombustivel');
+        const btns = el ? el.querySelectorAll('button') : [];
         btns.forEach(b => b.style.display = 'none');
         return btns;
     }
@@ -3677,7 +3831,7 @@
 
     function montarTextoWhatsAppRelatorio() {
         const totalLanc = lancamentosSessao.length;
-        const valorTotal = lancamentosSessao.reduce((acc, d) => acc + (parseFloat(d.total) || 0), 0);
+        const valorTotal = lancamentosSessao.reduce((acc, d) => acc + numeroMoedaParaFloat(d.total), 0);
         const motorista = lancamentosSessao[0]?.motorista || document.getElementById('nomeMotorista')?.value || '';
         const aparelho = gerarIdAparelhoLocal();
 
@@ -3690,7 +3844,7 @@
             `Total de lançamentos: ${totalLanc}`,
             `Valor total: R$ ${formatarMoedaBR(valorTotal)}`,
             '',
-            'Relatório PDF gerado automaticamente pelo app Controle de Combustível.'
+            'Relatório gerado automaticamente pelo app Controle de Combustível.'
         ].join('\n');
     }
 
