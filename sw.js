@@ -1,65 +1,103 @@
-const PREFIXO_CACHE = 'combustivel-funcionario-wm-';
-const CACHE_NAME = PREFIXO_CACHE + 'v8';
+const CACHE_NAME = 'controle-combustivel-controladoria-v10';
 
-const arquivosParaGuardar = [
+const ARQUIVOS_PARA_CACHE = [
   './',
   './index.html',
   './manifest.json',
-  './sw.js',
+
   './LOGOTIPO.jpg',
+  './controladoria.jpg',
   './Captura de tela 2026-02-13 132630.jpg',
-  './OLHOABERTO.png',
+
+  './OLHOABERTO_V2.png',
   './OLHOFECHADO_V2.png',
-  './imagem do app.png',
-  './icone_combustivel_v1.png'
+
+  './icone_principal_v14.png',
+  './icone_atalho_v14.png',
+  './icone_combustível_v1.png',
+
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
+  'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
 ];
 
-self.addEventListener('install', evento => {
-  evento.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(arquivosParaGuardar))
-  );
+self.addEventListener('install', event => {
   self.skipWaiting();
-});
 
-self.addEventListener('activate', evento => {
-  evento.waitUntil(
-    caches.keys().then(nomesCaches => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
       return Promise.all(
-        nomesCaches.map(nomeCache => {
-          if (nomeCache.startsWith(PREFIXO_CACHE) && nomeCache !== CACHE_NAME) {
-            return caches.delete(nomeCache);
-          }
+        ARQUIVOS_PARA_CACHE.map(url => {
+          return cache.add(url).catch(() => null);
         })
       );
     })
   );
-  self.clients.claim();
 });
 
-self.addEventListener('fetch', evento => {
-  evento.respondWith(
-    caches.match(evento.request, { ignoreSearch: true })
-      .then(respostaCache => {
-        if (respostaCache) return respostaCache;
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
+      );
+    }).then(() => self.clients.claim())
+  );
+});
 
-        return fetch(evento.request).then(respostaRede => {
-          return caches.open(CACHE_NAME).then(cache => {
-            if (
-              evento.request.method === 'GET' &&
-              respostaRede &&
-              respostaRede.status === 200
-            ) {
-              cache.put(evento.request, respostaRede.clone());
-            }
-            return respostaRede;
+self.addEventListener('fetch', event => {
+  const request = event.request;
+
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          const copia = response.clone();
+
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put('./index.html', copia);
           });
+
+          return response;
+        })
+        .catch(() => caches.match('./index.html'))
+    );
+
+    return;
+  }
+
+  event.respondWith(
+    caches.match(request).then(cached => {
+      if (cached) {
+        return cached;
+      }
+
+      return fetch(request)
+        .then(response => {
+          if (!response || response.status !== 200) {
+            return response;
+          }
+
+          const copia = response.clone();
+
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(request, copia);
+          });
+
+          return response;
+        })
+        .catch(() => {
+          if (request.destination === 'document') {
+            return caches.match('./index.html');
+          }
+
+          return caches.match(request);
         });
-      })
-      .catch(() => {
-        if (evento.request.mode === 'navigate') {
-          return caches.match('./index.html', { ignoreSearch: true });
-        }
-      })
+    })
   );
 });
