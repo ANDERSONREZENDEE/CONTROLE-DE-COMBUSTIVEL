@@ -1,0 +1,22 @@
+ARQUIVOS ADAPTADOS - CONTROLE DE COMBUSTÍVEL V31
+
+O index.html foi adaptado para carregar as bases separadas:
+
+1) base_dados_wm.js
+   - BASE DE DADOS WM
+   - Cor AZUL
+   - Veículos/equipamentos da WM
+
+2) base_dados_2_nao_wm.js
+   - BASE DE DADOS 2
+   - Cor VERDE
+   - Veículos/equipamentos que não são da WM
+
+Suba estes arquivos juntos no GitHub:
+- index.html
+- manifest.json
+- sw.js
+- base_dados_wm.js
+- base_dados_2_nao_wm.js
+
+Quando mudar as bases, atualize só os arquivos base_dados_wm.js e base_dados_2_nao_wm.js e aumente a versão no index, se necessário.
