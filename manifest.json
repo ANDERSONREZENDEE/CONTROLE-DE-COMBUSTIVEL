@@ -1,0 +1,53 @@
+{
+  "name": "CAIXINHA",
+  "short_name": "CAIXINHA",
+  "description": "Controle de Caixinha - senha dentro do index e offline permanente v40 - atualização segura sem apagar cache offline",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f7f6",
+  "theme_color": "#1a233a",
+  "icons": [
+    {
+      "src": "icone_principal_v14.png?v=40",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icone_principal_v14.png?v=40",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Novo Lançamento",
+      "short_name": "Novo",
+      "description": "Adicionar nova despesa ou crédito",
+      "url": "./index.html",
+      "icons": [
+        {
+          "src": "icone_principal_v14.png?v=40",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Ver Lançamentos",
+      "short_name": "Lançamentos",
+      "description": "Acessar lançamentos do caixinha",
+      "url": "./index.html?tela=planilha",
+      "icons": [
+        {
+          "src": "icone_principal_v14.png?v=40",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "scope": "./",
+  "orientation": "portrait"
+}

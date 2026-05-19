@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Caixinha WM</title>
+
+    <link rel="manifest" href="manifest.json?v=40">
+    <link rel="apple-touch-icon" href="icone_principal_v14.png?v=40">
+    <link rel="icon" type="image/png" href="icone_principal_v14.png?v=40">
+    <meta name="theme-color" content="#1a233a">
+
+    <script>
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || 
+               (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+               (e.ctrlKey && (e.key === 'U' || e.key === 'S' || e.key === 'C'))) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
+
+    <style>
+        :root {
+            --azul-wm: #1a233a; 
+            --laranja-wm: #f39c12; 
+            --verde-pos: #28a745;
+            --vermelho-neg: #dc3545;
+            --fundo: #f4f7f6;
+        }
+
+        .no-scroll { overflow: hidden !important; height: 100vh !important; }
+
+        body { 
+            font-family: Arial, sans-serif; background-color: #ccc; margin: 0; display: flex; justify-content: center; padding: 10px; 
+            -webkit-user-select: none; 
+            -moz-user-select: none; 
+            -ms-user-select: none; 
+            user-select: none; 
+            -webkit-touch-callout: none; 
+        }
+
+        input, select, textarea {
+            -webkit-user-select: auto;
+            -moz-user-select: auto;
+            -ms-user-select: auto;
+            user-select: auto;
+            transition: border 0.3s ease;
+        }
+
+        .app-container { width: 100%; max-width: 700px; background-color: var(--fundo); min-height: 95vh; border: 8px solid; border-image: linear-gradient(to right, var(--azul-wm) 50%, var(--laranja-wm) 50%) 1; box-shadow: 0 5px 15px rgba(0,0,0,0.3); box-sizing: border-box; position: relative; }
+
+        header { background-color: white; color: var(--azul-wm); padding: 15px 10px; text-align: center; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 10px; border-bottom: 2px solid #ddd; }
+
+        .logos-container { display: flex; flex-direction: row; justify-content: space-between; align-items: center; gap: 10px; width: 100%; max-width: 100%; overflow: hidden; box-sizing: border-box; padding: 0 5px; }
+        .logo-wm { width: 48%; max-width: 150px; height: auto; pointer-events: none; object-fit: contain; } 
+        .logo-controladoria { width: 48%; max-width: 150px; height: auto; border-radius: 4px; pointer-events: none; object-fit: contain; }
+
+        .titulo-header { font-size: 15px; color: var(--laranja-wm); margin-top: 5px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+
+        .painel-saldo, .formulario, .area-acoes { background: white; margin: 10px; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .linha-saldo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; }
+        .saldo-atual { font-size: 20px; font-weight: bold; text-align: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; }
+        .positivo { color: var(--verde-pos) !important; font-weight: bold; }
+        .negativo { color: var(--vermelho-neg) !important; font-weight: bold; }
+
+        .formulario { display: flex; flex-direction: column; gap: 10px; }
+        label { font-size: 12px; font-weight: bold; color: #555; margin-top: 5px; }
+        input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+
+        .btn-salvar { background-color: var(--azul-wm); color: white; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-ver-planilha { background-color: var(--verde-pos); color: white; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 5px;}
+
+        .area-acoes { display: flex; flex-wrap: wrap; gap: 10px; }
+        .btn-pausar { background-color: #e67e22; color: white; border: none; padding: 12px; font-size: 14px; border-radius: 5px; flex: 1; font-weight: bold; cursor: pointer;}
+        .btn-whats { background-color: #25D366; color: white; border: none; padding: 15px; font-size: 14px; border-radius: 5px; flex: 1 1 100%; font-weight: bold; cursor: pointer; }
+        .btn-encerrar { background-color: var(--vermelho-neg); color: white; border: none; padding: 12px; font-size: 13px; border-radius: 5px; flex: 1 1 100%; font-weight: bold; margin-top: 5px; cursor: pointer;}
+
+        #tela-planilha { display: none; padding: 10px; background: white; min-height: 90vh; }
+        .tabela-container { overflow-x: auto; margin-top: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%; }
+
+        table { width: 100%; min-width: 600px; border-collapse: collapse; font-size: 11px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: middle; }
+        th { background-color: var(--azul-wm); color: white; }
+
+        .foto-miniatura { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; cursor: pointer; display: block; margin-top: 3px; }
+        .anexo-box { display: flex; flex-direction: column; align-items: center; margin-bottom: 5px; background: #f9f9f9; padding: 5px; border-radius: 4px; border: 1px solid #eee; text-align: center; max-width: 120px; }
+        .legenda-foto { font-size: 10px; font-weight: bold; color: var(--azul-wm); word-wrap: break-word; text-align: center; }
+
+        .cabecalho-oficial { display: block; font-size: 13px; line-height: 1.4; background: white; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 10px; overflow: hidden; }
+
+        .cabecalho-oficial .info-box { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 8px; padding-top: 8px; }
+
+        /* Estilos para o cabeçalho do relatório na tela (Ver Planilha) */
+        .cabecalho-topo { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-bottom: 10px; gap: 10px; }
+        .img-cabecalho { height: 50px; width: auto; max-width: 30%; object-fit: contain; }
+        .texto-cabecalho { text-align: center; flex: 1; }
+        .texto-cabecalho h3 { margin: 0; font-size: 14px; color: var(--azul-wm); }
+        .texto-cabecalho small { display: block; color: #666; font-size: 10px; margin-top: 2px; }
+
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            @page { size: landscape; margin: 0.5cm; }
+            body, html { display: block !important; background: white !important; background-color: white !important; height: auto !important; min-height: auto !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; }
+            .app-container { border: none !important; box-shadow: none !important; max-width: 100% !important; width: 100% !important; display: block !important; height: auto !important; min-height: auto !important; overflow: visible !important; padding: 0 !important; margin: 0 !important; }
+            .formulario, .area-acoes, .btn-voltar, .btn-ver-planilha, th:last-child, td:last-child { display: none !important; }
+            #tela-planilha, .tabela-container { display: block !important; overflow: visible !important; overflow-x: visible !important; overflow-y: visible !important; height: auto !important; width: 100% !important; margin: 0 !important; padding: 0 !important; border: none !important; background: white !important; }
+            .cabecalho-oficial { display: block !important; border: 1px solid #000 !important; padding: 4px !important; margin-bottom: 2px !important; border-radius: 0 !important; line-height: 1.12 !important; background: white !important; }
+            .cabecalho-topo { display: flex !important; justify-content: space-between !important; align-items: center !important; border-bottom: 2px solid #000 !important; padding-bottom: 2px !important; margin-bottom: 2px !important; gap: 5px !important; }
+            .img-cabecalho { height: 34px !important; max-height: 34px !important; width: auto !important; max-width: 28% !important; object-fit: contain !important; margin: 0 !important; display: block !important; }
+            .texto-cabecalho { text-align: center !important; flex: 1 !important; min-width: 0 !important; padding: 0 !important; margin: 0 !important; line-height: 1.1 !important; }
+            .texto-cabecalho h3 { margin: 0 !important; font-size: 12px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+            .texto-cabecalho small { color: #555 !important; font-size: 7px !important; display: block !important; margin-top: 1px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+            .cabecalho-oficial .info-box { grid-template-columns: 1fr 1fr !important; gap: 4px !important; margin-top: 2px !important; padding-top: 2px !important; font-size: 9px !important; }
+            .cabecalho-oficial .info-box div { padding: 3px !important; }
+            table { display: table !important; font-size: 9px !important; width: 100% !important; min-width: auto !important; max-width: 100% !important; page-break-inside: auto; margin-top: 0 !important; table-layout: fixed !important; word-wrap: normal !important; background: white !important; }
+            tr { display: table-row !important; page-break-inside: avoid; page-break-after: auto; }
+            th, td { display: table-cell !important; padding: 3px !important; word-wrap: break-word !important; overflow-wrap: break-word !important; white-space: normal !important; }
+            thead { display: table-header-group !important; }
+            tfoot { display: table-footer-group !important; }
+            tbody { display: table-row-group !important; }
+            .foto-miniatura { width: 45px !important; height: auto !important; max-height: 45px !important; object-fit: contain !important; }
+            .anexo-box { border: none !important; padding: 0 !important; background: transparent !important; margin-bottom: 2px !important; }
+            .legenda-foto { font-size: 8px !important; }
+            img { max-width: 100% !important; height: auto !important; }
+        }
+
+
+        /* ==========================================
+           BLOQUEIO TOTAL NO COMPUTADOR / DESKTOP
+        ========================================== */
+        #bloqueio-computador {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 999999;
+            background: #000000;
+            color: white;
+            padding: 22px;
+            box-sizing: border-box;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+        }
+
+        #bloqueio-computador .box-bloqueio {
+            width: 92%;
+            max-width: 420px;
+            background: #ffffff;
+            color: #1a233a;
+            border-radius: 14px;
+            padding: 25px 18px;
+            box-shadow: 0 0 25px rgba(255,255,255,0.25);
+            border: 4px solid #f39c12;
+        }
+
+        #bloqueio-computador h2 {
+            margin: 0 0 10px 0;
+            color: #dc3545;
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        #bloqueio-computador p {
+            margin: 8px 0;
+            font-size: 14px;
+            line-height: 1.4;
+            font-weight: bold;
+        }
+
+        body.computador-bloqueado {
+            overflow: hidden !important;
+        }
+
+        body.computador-bloqueado .app-container,
+        body.computador-bloqueado #tela-login,
+        body.computador-bloqueado #modal-acao,
+        body.computador-bloqueado #modal-foto {
+            pointer-events: none !important;
+            filter: blur(2px);
+        }
+
+        body.computador-bloqueado #bloqueio-computador {
+            display: flex !important;
+        }
+
+        .box-deposito {
+            border-top: 1px solid #ddd;
+            margin-top: 8px;
+            padding-top: 8px;
+            background: #eef3ff;
+            padding: 8px;
+            border-radius: 6px;
+            border-left: 4px solid var(--azul-wm);
+        }
+
+        .box-deposito .titulo-deposito {
+            display: block;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--azul-wm);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .linha-deposito {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .linha-deposito label {
+            margin-top: 0;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .linha-deposito input,
+        .linha-deposito select {
+            font-size: 12px;
+            padding: 8px;
+            font-weight: bold;
+        }
+
+        #modal-foto { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
+        #foto-ampliada { max-width: 90%; max-height: 80%; border: 3px solid white; pointer-events: none; }
+
+        #tela-login, #modal-acao {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000000;
+            z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        #modal-acao { display: none; }
+
+        .login-box { background: white; padding: 25px; border-radius: 10px; width: 85%; max-width: 320px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .login-box img { max-height: 60px; margin-bottom: 10px; object-fit: contain; pointer-events: none; }
+    
+        /* =====================================================
+           CORREÇÃO FINAL V38
+           - PC BLOQUEADO COM MENSAGEM
+           - CELULAR LIBERADO
+           - CAMPO FALTANTE PISCANDO
+        ===================================================== */
+        .campo-piscando {
+            border: 3px solid #dc3545 !important;
+            box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.18) !important;
+            animation: piscarCampoObrigatorio 0.75s infinite;
+            background: #fff8f8 !important;
+        }
+
+        @keyframes piscarCampoObrigatorio {
+            0%, 100% { border-color: #dc3545; box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.18); }
+            50% { border-color: #f39c12; box-shadow: 0 0 0 4px rgba(243, 156, 18, 0.25); }
+        }
+
+        @media (hover: hover) and (pointer: fine) and (min-width: 900px) {
+            #bloqueio-computador {
+                display: flex !important;
+            }
+
+            .app-container,
+            #tela-login,
+            #modal-acao,
+            #modal-foto {
+                pointer-events: none !important;
+                filter: blur(2px) !important;
+            }
+
+            body {
+                overflow: hidden !important;
+            }
+        }
+
+        @media (hover: none), (pointer: coarse), (max-width: 899px) {
+            #bloqueio-computador {
+                display: none !important;
+            }
+
+            body {
+                overflow: auto !important;
+            }
+
+            #tela-login,
+            #tela-login input,
+            #tela-login button,
+            #tela-login img,
+            #modal-acao,
+            #modal-acao input,
+            #modal-acao button,
+            #modal-acao img {
+                pointer-events: auto !important;
+                filter: none !important;
+            }
+        }
+
+    
+        /* =====================================================
+           RELATÓRIO WHATSAPP/PDF V38
+           - Organiza identificação à esquerda
+           - Dados para depósito à direita
+           - Oculta Editar/Excluir somente no PDF compartilhado
+        ===================================================== */
+        .cabecalho-oficial .info-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 8px;
+            padding-top: 8px;
+            align-items: stretch;
+        }
+
+        .info-coluna-relatorio {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .info-coluna-relatorio .titulo-bloco {
+            display: block;
+            font-weight: 900;
+            color: var(--azul-wm);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 3px;
+        }
+
+        .resumo-saldo-relatorio {
+            grid-column: 1 / -1;
+            background: #fdf5e6;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            font-size: 12px;
+            align-items: center;
+        }
+
+        .resumo-saldo-relatorio div {
+            background: #ffffff;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 5px;
+            text-align: center;
+        }
+
+        body.gerando-relatorio .col-acoes,
+        body.gerando-relatorio .btn-voltar {
+            display: none !important;
+        }
+
+        body.gerando-relatorio #tabela-dados {
+            min-width: auto !important;
+            table-layout: fixed !important;
+            width: 100% !important;
+        }
+
+        body.gerando-relatorio #tela-planilha,
+        body.gerando-relatorio .tabela-container {
+            overflow: visible !important;
+            overflow-x: visible !important;
+        }
+
+        @media print {
+            .col-acoes,
+            .btn-voltar {
+                display: none !important;
+            }
+
+            .cabecalho-oficial .info-box {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 4px !important;
+                margin-top: 2px !important;
+                padding-top: 2px !important;
+            }
+
+            .info-coluna-relatorio {
+                font-size: 9px !important;
+                line-height: 1.18 !important;
+                padding: 4px !important;
+                border-radius: 0 !important;
+            }
+
+            .info-coluna-relatorio .titulo-bloco {
+                font-size: 9px !important;
+                margin-bottom: 2px !important;
+                padding-bottom: 1px !important;
+            }
+
+            .resumo-saldo-relatorio {
+                grid-template-columns: repeat(4, 1fr) !important;
+                font-size: 9px !important;
+                padding: 4px !important;
+                gap: 3px !important;
+                border-radius: 0 !important;
+            }
+
+            .resumo-saldo-relatorio div {
+                padding: 3px !important;
+            }
+        }
+
+    </style>
+</head>
+<body ondragstart="return false;" ondrop="return false;">
+
+
+<div id="bloqueio-computador">
+    <div class="box-bloqueio">
+        <h2>🔒 BLOQUEADO NO COMPUTADOR</h2>
+        <p>Este aplicativo deve ser utilizado somente pelo celular.</p>
+        <p>As fotos e o relatório devem ser registrados pelo aparelho móvel.</p>
+        <p>Abra o app pelo celular para continuar.</p>
+    </div>
+</div>
+
+
+<div id="tela-login">
+    <div class="login-box">
+        <img src="LOGOTIPO.jpg" alt="Logo WM">
+        <h3 style="color: var(--azul-wm); margin-top: 0; margin-bottom: 5px;">ACESSO RESTRITO</h3>
+        <p style="color: #666; font-size: 12px; margin-bottom: 5px;">Área exclusiva para funcionários</p>
+
+        <div style="position: relative; width: 100%; margin: 15px 0;">
+            <input type="password" id="senha-input" placeholder="SENHA" style="width: 100%; margin: 0; padding-right: 40px; text-align: center; font-size: 20px; font-weight: bold; letter-spacing: 2px;">
+            <img id="icone-olho" src="OLHOFECHADO_V2.png" onclick="mostrarSenha()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; height: 26px; width: 26px; object-fit: contain; pointer-events: auto !important; z-index: 20;" title="Mostrar/Ocultar Senha">
+        </div>
+
+        <button class="btn-salvar" style="width: 100%; font-size: 16px; padding: 15px;" onclick="validarAcesso()">ENTRAR NO APP</button>
+        <p id="erro-login" style="color: red; font-size: 13px; font-weight: bold; display: none; margin-top: 15px;">❌ Senha incorreta!</p>
+    </div>
+</div>
+
+<div id="modal-acao">
+    <div class="login-box">
+        <img src="LOGOTIPO.jpg" alt="Logo WM">
+        <h3 style="color: var(--azul-wm); margin-top: 0; margin-bottom: 5px;">ACESSO RESTRITO</h3>
+        <p style="color: #666; font-size: 12px; margin-bottom: 5px;" id="texto-acao-modal">Confirme a senha para continuar</p>
+
+        <div style="position: relative; width: 100%; margin: 15px 0;">
+            <input type="password" id="senha-acao-input" placeholder="SENHA" style="width: 100%; margin: 0; padding-right: 40px; text-align: center; font-size: 20px; font-weight: bold; letter-spacing: 2px;">
+            <img id="icone-olho-acao" src="OLHOFECHADO_V2.png" onclick="mostrarSenhaAcao()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; height: 26px; width: 26px; object-fit: contain; pointer-events: auto !important; z-index: 20;" title="Mostrar/Ocultar Senha">
+        </div>
+
+        <div style="display: flex; gap: 10px; width: 100%;">
+            <button class="btn-salvar" style="flex: 1; font-size: 14px; padding: 12px; margin-top: 5px;" onclick="validarSenhaAcao()">CONFIRMAR</button>
+            <button class="btn-salvar" style="flex: 1; font-size: 14px; padding: 12px; margin-top: 5px;" onclick="fecharModalAcao()">CANCELAR</button>
+        </div>
+        <p id="erro-senha-acao" style="color: red; font-size: 13px; font-weight: bold; display: none; margin-top: 15px;">❌ Senha incorreta!</p>
+    </div>
+</div>
+
+<div class="app-container">
+    <div id="tela-principal" style="display:none;">
+        <header>
+            <div class="logos-container">
+                <img src="LOGOTIPO.jpg" alt="WM" class="logo-wm">
+                <img src="controladoria.jpg" onerror="this.onerror=null;this.src='Captura%20de%20tela%202026-02-13%20132630.jpg';" alt="Controladoria" class="logo-controladoria">
+            </div>
+            <div class="titulo-header">✨ GESTÃO INTELIGENTE DE CAIXINHA ✨</div>
+        </header>
+
+        <div class="painel-saldo">
+            <div style="background: #fdf5e6; padding: 10px; border-radius: 4px;">
+                <div class="linha-saldo">
+                    <label style="font-weight: bold; text-transform: uppercase;">Nº DO CAIXINHA: <span style="color:red">*</span></label>
+                    <input type="number" id="num-caixinha" placeholder="Ex: 13" style="width: 80px; text-align: center; font-weight: bold;" onchange="salvarCabecalho()" required>
+                </div>
+                <div class="linha-saldo">
+                    <label style="font-weight: bold; text-transform: uppercase;">GESTOR: <span style="color:red">*</span></label>
+                    <input type="text" id="nome-gestor" placeholder="Nome do Gestor" style="width: 150px;" onchange="salvarCabecalho()" required>
+                </div>
+                <div class="linha-saldo" style="border-top: 1px solid #ddd; padding-top: 5px;">
+                    <span style="font-weight: bold; text-transform: uppercase; font-size: 12px; color: #555;">AUDITOR:</span>
+                    <span style="font-weight: bold;">Anderson</span>
+                </div>
+
+                <div class="box-deposito">
+                    <span class="titulo-deposito">Dados para Depósito</span>
+
+                    <div class="linha-deposito">
+                        <label>Tipo da Chave PIX: <span style="color:red">*</span></label>
+                        <select id="tipo-chave-pix" onchange="ajustarCampoChavePix(); salvarCabecalho()">
+                            <option value="">-- SELECIONE O TIPO DE CHAVE --</option>
+                            <option value="CPF">CPF</option>
+                            <option value="CNPJ">CNPJ</option>
+                            <option value="CELULAR">CELULAR</option>
+                            <option value="E-MAIL">E-MAIL</option>
+                            <option value="CHAVE ALEATÓRIA">CHAVE ALEATÓRIA</option>
+                        </select>
+
+                        <label>Chave PIX: <span style="color:red">*</span></label>
+                        <input type="text" id="chave-pix-deposito" placeholder="Digite a chave PIX conforme o tipo selecionado" oninput="formatarChavePix()" onchange="salvarCabecalho()">
+
+                        <label>Banco: <span style="color:red">*</span></label>
+                        <select id="banco-deposito" onchange="salvarCabecalho()">
+                            <option value="">-- SELECIONE O BANCO --</option>
+                            <option value="001 - Banco do Brasil S.A.">001 - Banco do Brasil S.A.</option>
+                            <option value="003 - Banco da Amazônia S.A.">003 - Banco da Amazônia S.A.</option>
+                            <option value="004 - Banco do Nordeste do Brasil S.A.">004 - Banco do Nordeste do Brasil S.A.</option>
+                            <option value="007 - BNDES">007 - BNDES</option>
+                            <option value="010 - Credicoamo Crédito Rural Cooperativa">010 - Credicoamo Crédito Rural Cooperativa</option>
+                            <option value="011 - Credit Suisse Hedging-Griffo Corretora de Valores S.A.">011 - Credit Suisse Hedging-Griffo Corretora de Valores S.A.</option>
+                            <option value="012 - Banco Inbursa S.A.">012 - Banco Inbursa S.A.</option>
+                            <option value="014 - Natixis Brasil S.A. Banco Múltiplo">014 - Natixis Brasil S.A. Banco Múltiplo</option>
+                            <option value="015 - UBS Brasil Corretora de Câmbio, Títulos e Valores Mobiliários S.A.">015 - UBS Brasil Corretora de Câmbio, Títulos e Valores Mobiliários S.A.</option>
+                            <option value="016 - Cooperativa de Crédito Mútuo dos Despachantes de Trânsito de SC e RS">016 - Cooperativa de Crédito Mútuo dos Despachantes de Trânsito de SC e RS</option>
+                            <option value="017 - BNY Mellon Banco S.A.">017 - BNY Mellon Banco S.A.</option>
+                            <option value="018 - Banco Tricury S.A.">018 - Banco Tricury S.A.</option>
+                            <option value="021 - Banco Banestes S.A.">021 - Banco Banestes S.A.</option>
+                            <option value="024 - Banco Bandepe S.A.">024 - Banco Bandepe S.A.</option>
+                            <option value="025 - Banco Alfa S.A.">025 - Banco Alfa S.A.</option>
+                            <option value="029 - Banco Itaú Consignado S.A.">029 - Banco Itaú Consignado S.A.</option>
+                            <option value="033 - Banco Santander (Brasil) S.A.">033 - Banco Santander (Brasil) S.A.</option>
+                            <option value="036 - Banco Bradesco BBI S.A.">036 - Banco Bradesco BBI S.A.</option>
+                            <option value="037 - Banco do Estado do Pará S.A.">037 - Banco do Estado do Pará S.A.</option>
+                            <option value="040 - Banco Cargill S.A.">040 - Banco Cargill S.A.</option>
+                            <option value="041 - Banco do Estado do Rio Grande do Sul S.A.">041 - Banco do Estado do Rio Grande do Sul S.A.</option>
+                            <option value="047 - Banco do Estado de Sergipe S.A.">047 - Banco do Estado de Sergipe S.A.</option>
+                            <option value="060 - Confidence Corretora de Câmbio S.A.">060 - Confidence Corretora de Câmbio S.A.</option>
+                            <option value="062 - Hipercard Banco Múltiplo S.A.">062 - Hipercard Banco Múltiplo S.A.</option>
+                            <option value="063 - Banco Bradescard S.A.">063 - Banco Bradescard S.A.</option>
+                            <option value="064 - Goldman Sachs do Brasil Banco Múltiplo S.A.">064 - Goldman Sachs do Brasil Banco Múltiplo S.A.</option>
+                            <option value="065 - Banco Andbank (Brasil) S.A.">065 - Banco Andbank (Brasil) S.A.</option>
+                            <option value="066 - Banco Morgan Stanley S.A.">066 - Banco Morgan Stanley S.A.</option>
+                            <option value="069 - Banco Crefisa S.A.">069 - Banco Crefisa S.A.</option>
+                            <option value="070 - Banco de Brasília S.A.">070 - Banco de Brasília S.A.</option>
+                            <option value="074 - Banco J. Safra S.A.">074 - Banco J. Safra S.A.</option>
+                            <option value="075 - Banco ABN AMRO S.A.">075 - Banco ABN AMRO S.A.</option>
+                            <option value="076 - Banco KDB do Brasil S.A.">076 - Banco KDB do Brasil S.A.</option>
+                            <option value="077 - Banco Inter S.A.">077 - Banco Inter S.A.</option>
+                            <option value="078 - Haitong Banco de Investimento do Brasil S.A.">078 - Haitong Banco de Investimento do Brasil S.A.</option>
+                            <option value="079 - Banco Original do Agronegócio S.A.">079 - Banco Original do Agronegócio S.A.</option>
+                            <option value="080 - B&T Corretora de Câmbio Ltda.">080 - B&T Corretora de Câmbio Ltda.</option>
+                            <option value="081 - BancoSeguro S.A.">081 - BancoSeguro S.A.</option>
+                            <option value="082 - Banco Topázio S.A.">082 - Banco Topázio S.A.</option>
+                            <option value="083 - Banco da China Brasil S.A.">083 - Banco da China Brasil S.A.</option>
+                            <option value="084 - Uniprime Norte do Paraná">084 - Uniprime Norte do Paraná</option>
+                            <option value="085 - Cooperativa Central de Crédito Urbano">085 - Cooperativa Central de Crédito Urbano</option>
+                            <option value="089 - Cooperativa de Crédito Rural da Região de Mogiana">089 - Cooperativa de Crédito Rural da Região de Mogiana</option>
+                            <option value="091 - Unicred Central RS">091 - Unicred Central RS</option>
+                            <option value="092 - Brickell S.A. Crédito, Financiamento e Investimento">092 - Brickell S.A. Crédito, Financiamento e Investimento</option>
+                            <option value="093 - Pólocred Sociedade de Crédito ao Microempreendedor">093 - Pólocred Sociedade de Crédito ao Microempreendedor</option>
+                            <option value="094 - Banco Finaxis S.A.">094 - Banco Finaxis S.A.</option>
+                            <option value="095 - Travelex Banco de Câmbio S.A.">095 - Travelex Banco de Câmbio S.A.</option>
+                            <option value="096 - Banco B3 S.A.">096 - Banco B3 S.A.</option>
+                            <option value="097 - Credisis Central de Cooperativas de Crédito">097 - Credisis Central de Cooperativas de Crédito</option>
+                            <option value="098 - Credialiança Cooperativa de Crédito Rural">098 - Credialiança Cooperativa de Crédito Rural</option>
+                            <option value="099 - Uniprime Central Nacional">099 - Uniprime Central Nacional</option>
+                            <option value="100 - Planner Corretora de Valores S.A.">100 - Planner Corretora de Valores S.A.</option>
+                            <option value="101 - Renascença Distribuidora de Títulos e Valores Mobiliários Ltda.">101 - Renascença Distribuidora de Títulos e Valores Mobiliários Ltda.</option>
+                            <option value="102 - XP Investimentos Corretora de Câmbio, Títulos e Valores Mobiliários S.A.">102 - XP Investimentos Corretora de Câmbio, Títulos e Valores Mobiliários S.A.</option>
+                            <option value="104 - Caixa Econômica Federal">104 - Caixa Econômica Federal</option>
+                            <option value="105 - Lecca Crédito, Financiamento e Investimento S.A.">105 - Lecca Crédito, Financiamento e Investimento S.A.</option>
+                            <option value="107 - Banco Bocom BBM S.A.">107 - Banco Bocom BBM S.A.</option>
+                            <option value="108 - Portocred S.A.">108 - Portocred S.A.</option>
+                            <option value="111 - Oliveira Trust DTVM S.A.">111 - Oliveira Trust DTVM S.A.</option>
+                            <option value="113 - Magliano S.A. Corretora de Câmbio e Valores Mobiliários">113 - Magliano S.A. Corretora de Câmbio e Valores Mobiliários</option>
+                            <option value="114 - Central Cooperativa de Crédito no Estado do Espírito Santo">114 - Central Cooperativa de Crédito no Estado do Espírito Santo</option>
+                            <option value="117 - Advanced Corretora de Câmbio Ltda.">117 - Advanced Corretora de Câmbio Ltda.</option>
+                            <option value="118 - Standard Chartered Bank (Brasil) S.A.">118 - Standard Chartered Bank (Brasil) S.A.</option>
+                            <option value="119 - Banco Western Union do Brasil S.A.">119 - Banco Western Union do Brasil S.A.</option>
+                            <option value="120 - Banco Rodobens S.A.">120 - Banco Rodobens S.A.</option>
+                            <option value="121 - Banco Agibank S.A.">121 - Banco Agibank S.A.</option>
+                            <option value="122 - Banco Bradesco BERJ S.A.">122 - Banco Bradesco BERJ S.A.</option>
+                            <option value="124 - Banco Woori Bank do Brasil S.A.">124 - Banco Woori Bank do Brasil S.A.</option>
+                            <option value="125 - Brasil Plural S.A. Banco Múltiplo">125 - Brasil Plural S.A. Banco Múltiplo</option>
+                            <option value="126 - BR Partners Banco de Investimento S.A.">126 - BR Partners Banco de Investimento S.A.</option>
+                            <option value="127 - Codepe Corretora de Valores e Câmbio S.A.">127 - Codepe Corretora de Valores e Câmbio S.A.</option>
+                            <option value="128 - MS Bank S.A. Banco de Câmbio">128 - MS Bank S.A. Banco de Câmbio</option>
+                            <option value="129 - UBS Brasil Banco de Investimento S.A.">129 - UBS Brasil Banco de Investimento S.A.</option>
+                            <option value="130 - Caruana S.A. Sociedade de Crédito, Financiamento e Investimento">130 - Caruana S.A. Sociedade de Crédito, Financiamento e Investimento</option>
+                            <option value="131 - Tullett Prebon Brasil Corretora de Valores e Câmbio Ltda.">131 - Tullett Prebon Brasil Corretora de Valores e Câmbio Ltda.</option>
+                            <option value="132 - ICBC do Brasil Banco Múltiplo S.A.">132 - ICBC do Brasil Banco Múltiplo S.A.</option>
+                            <option value="133 - Cresol Confederação">133 - Cresol Confederação</option>
+                            <option value="134 - BGC Liquidez DTVM Ltda.">134 - BGC Liquidez DTVM Ltda.</option>
+                            <option value="136 - Unicred Cooperativa">136 - Unicred Cooperativa</option>
+                            <option value="138 - Get Money Corretora de Câmbio S.A.">138 - Get Money Corretora de Câmbio S.A.</option>
+                            <option value="139 - Intesa Sanpaolo Brasil S.A.">139 - Intesa Sanpaolo Brasil S.A.</option>
+                            <option value="140 - Easynvest / NuInvest">140 - Easynvest / NuInvest</option>
+                            <option value="142 - Broker Brasil Corretora de Câmbio Ltda.">142 - Broker Brasil Corretora de Câmbio Ltda.</option>
+                            <option value="143 - Treviso Corretora de Câmbio S.A.">143 - Treviso Corretora de Câmbio S.A.</option>
+                            <option value="144 - Bexs Banco de Câmbio S.A.">144 - Bexs Banco de Câmbio S.A.</option>
+                            <option value="145 - Levycam Corretora de Câmbio e Valores Ltda.">145 - Levycam Corretora de Câmbio e Valores Ltda.</option>
+                            <option value="146 - Guitta Corretora de Câmbio Ltda.">146 - Guitta Corretora de Câmbio Ltda.</option>
+                            <option value="149 - Facta Financeira S.A.">149 - Facta Financeira S.A.</option>
+                            <option value="157 - ICAP do Brasil Corretora de Títulos e Valores Mobiliários Ltda.">157 - ICAP do Brasil Corretora de Títulos e Valores Mobiliários Ltda.</option>
+                            <option value="159 - Casa do Crédito S.A.">159 - Casa do Crédito S.A.</option>
+                            <option value="163 - Commerzbank Brasil S.A. Banco Múltiplo">163 - Commerzbank Brasil S.A. Banco Múltiplo</option>
+                            <option value="169 - Banco Olé Bonsucesso Consignado S.A.">169 - Banco Olé Bonsucesso Consignado S.A.</option>
+                            <option value="173 - BRL Trust DTVM S.A.">173 - BRL Trust DTVM S.A.</option>
+                            <option value="174 - Pernambucanas Financiadora S.A.">174 - Pernambucanas Financiadora S.A.</option>
+                            <option value="177 - Guide Investimentos S.A. Corretora de Valores">177 - Guide Investimentos S.A. Corretora de Valores</option>
+                            <option value="180 - CM Capital Markets Corretora de Câmbio, Títulos e Valores Mobiliários Ltda.">180 - CM Capital Markets Corretora de Câmbio, Títulos e Valores Mobiliários Ltda.</option>
+                            <option value="182 - Dacasa Financeira S.A.">182 - Dacasa Financeira S.A.</option>
+                            <option value="183 - Socred S.A.">183 - Socred S.A.</option>
+                            <option value="184 - Banco Itaú BBA S.A.">184 - Banco Itaú BBA S.A.</option>
+                            <option value="188 - Ativa S.A. Investimentos">188 - Ativa S.A. Investimentos</option>
+                            <option value="189 - HS Financeira S.A.">189 - HS Financeira S.A.</option>
+                            <option value="190 - Servicoop Cooperativa de Crédito">190 - Servicoop Cooperativa de Crédito</option>
+                            <option value="191 - Nova Futura Corretora de Títulos e Valores Mobiliários Ltda.">191 - Nova Futura Corretora de Títulos e Valores Mobiliários Ltda.</option>
+                            <option value="194 - Parmetal DTVM Ltda.">194 - Parmetal DTVM Ltda.</option>
+                            <option value="196 - Fair Corretora de Câmbio S.A.">196 - Fair Corretora de Câmbio S.A.</option>
+                            <option value="197 - Stone Pagamentos S.A.">197 - Stone Pagamentos S.A.</option>
+                            <option value="208 - Banco BTG Pactual S.A.">208 - Banco BTG Pactual S.A.</option>
+                            <option value="212 - Banco Original S.A.">212 - Banco Original S.A.</option>
+                            <option value="213 - Banco Arbi S.A.">213 - Banco Arbi S.A.</option>
+                            <option value="217 - Banco John Deere S.A.">217 - Banco John Deere S.A.</option>
+                            <option value="218 - Banco BS2 S.A.">218 - Banco BS2 S.A.</option>
+                            <option value="222 - Banco Credit Agricole Brasil S.A.">222 - Banco Credit Agricole Brasil S.A.</option>
+                            <option value="224 - Banco Fibra S.A.">224 - Banco Fibra S.A.</option>
+                            <option value="233 - Banco Cifra S.A.">233 - Banco Cifra S.A.</option>
+                            <option value="237 - Banco Bradesco S.A.">237 - Banco Bradesco S.A.</option>
+                            <option value="241 - Banco Clássico S.A.">241 - Banco Clássico S.A.</option>
+                            <option value="243 - Banco Máxima S.A.">243 - Banco Máxima S.A.</option>
+                            <option value="246 - Banco ABC Brasil S.A.">246 - Banco ABC Brasil S.A.</option>
+                            <option value="249 - Banco Investcred Unibanco S.A.">249 - Banco Investcred Unibanco S.A.</option>
+                            <option value="250 - Banco BCV S.A.">250 - Banco BCV S.A.</option>
+                            <option value="253 - Bexs Corretora de Câmbio S.A.">253 - Bexs Corretora de Câmbio S.A.</option>
+                            <option value="254 - Paraná Banco S.A.">254 - Paraná Banco S.A.</option>
+                            <option value="259 - Monecor Corretora de Câmbio Ltda.">259 - Monecor Corretora de Câmbio Ltda.</option>
+                            <option value="260 - Nu Pagamentos S.A. / Nubank">260 - Nu Pagamentos S.A. / Nubank</option>
+                            <option value="265 - Banco Fator S.A.">265 - Banco Fator S.A.</option>
+                            <option value="266 - Banco Cédula S.A.">266 - Banco Cédula S.A.</option>
+                            <option value="268 - Barigui Companhia Hipotecária">268 - Barigui Companhia Hipotecária</option>
+                            <option value="269 - HSBC Brasil S.A. Banco de Investimento">269 - HSBC Brasil S.A. Banco de Investimento</option>
+                            <option value="270 - Sagitur Corretora de Câmbio Ltda.">270 - Sagitur Corretora de Câmbio Ltda.</option>
+                            <option value="271 - IB Corretora de Câmbio, Títulos e Valores Mobiliários S.A.">271 - IB Corretora de Câmbio, Títulos e Valores Mobiliários S.A.</option>
+                            <option value="272 - AGK Corretora de Câmbio S.A.">272 - AGK Corretora de Câmbio S.A.</option>
+                            <option value="273 - Cooperativa de Crédito Rural de São Miguel do Oeste">273 - Cooperativa de Crédito Rural de São Miguel do Oeste</option>
+                            <option value="274 - Money Plus Sociedade de Crédito ao Microempreendedor">274 - Money Plus Sociedade de Crédito ao Microempreendedor</option>
+                            <option value="276 - Banco Senff S.A.">276 - Banco Senff S.A.</option>
+                            <option value="278 - Genial Investimentos Corretora de Valores Mobiliários S.A.">278 - Genial Investimentos Corretora de Valores Mobiliários S.A.</option>
+                            <option value="279 - Cooperativa de Crédito Rural de Primavera do Leste">279 - Cooperativa de Crédito Rural de Primavera do Leste</option>
+                            <option value="280 - Avista S.A. Crédito, Financiamento e Investimento">280 - Avista S.A. Crédito, Financiamento e Investimento</option>
+                            <option value="281 - Cooperativa de Crédito Rural Coopavel">281 - Cooperativa de Crédito Rural Coopavel</option>
+                            <option value="283 - RB Capital Investimentos DTVM Ltda.">283 - RB Capital Investimentos DTVM Ltda.</option>
+                            <option value="285 - Frente Corretora de Câmbio Ltda.">285 - Frente Corretora de Câmbio Ltda.</option>
+                            <option value="286 - Cooperativa de Crédito Rural De Ouro">286 - Cooperativa de Crédito Rural De Ouro</option>
+                            <option value="288 - Carol DTVM Ltda.">288 - Carol DTVM Ltda.</option>
+                            <option value="289 - Decyseo Corretora de Câmbio Ltda.">289 - Decyseo Corretora de Câmbio Ltda.</option>
+                            <option value="290 - PagSeguro Internet S.A.">290 - PagSeguro Internet S.A.</option>
+                            <option value="292 - BS2 Distribuidora de Títulos e Valores Mobiliários S.A.">292 - BS2 Distribuidora de Títulos e Valores Mobiliários S.A.</option>
+                            <option value="293 - Lastro RDV DTVM Ltda.">293 - Lastro RDV DTVM Ltda.</option>
+                            <option value="296 - Vision S.A. Corretora de Câmbio">296 - Vision S.A. Corretora de Câmbio</option>
+                            <option value="298 - Vip's Corretora de Câmbio Ltda.">298 - Vip's Corretora de Câmbio Ltda.</option>
+                            <option value="299 - Sorocred Crédito, Financiamento e Investimento S.A.">299 - Sorocred Crédito, Financiamento e Investimento S.A.</option>
+                            <option value="300 - Banco de la Nación Argentina">300 - Banco de la Nación Argentina</option>
+                            <option value="301 - BPP Instituição de Pagamento S.A.">301 - BPP Instituição de Pagamento S.A.</option>
+                            <option value="306 - Portopar DTVM Ltda.">306 - Portopar DTVM Ltda.</option>
+                            <option value="307 - Terra Investimentos DTVM Ltda.">307 - Terra Investimentos DTVM Ltda.</option>
+                            <option value="309 - Cambionet Corretora de Câmbio Ltda.">309 - Cambionet Corretora de Câmbio Ltda.</option>
+                            <option value="310 - Vortx DTVM Ltda.">310 - Vortx DTVM Ltda.</option>
+                            <option value="315 - Pi DTVM S.A.">315 - Pi DTVM S.A.</option>
+                            <option value="318 - Banco BMG S.A.">318 - Banco BMG S.A.</option>
+                            <option value="320 - China Construction Bank Brasil Banco Múltiplo S.A.">320 - China Construction Bank Brasil Banco Múltiplo S.A.</option>
+                            <option value="321 - Creditas Sociedade de Crédito Direto S.A.">321 - Creditas Sociedade de Crédito Direto S.A.</option>
+                            <option value="322 - Cooperativa de Crédito Rural de Abelardo Luz">322 - Cooperativa de Crédito Rural de Abelardo Luz</option>
+                            <option value="323 - Mercado Pago Instituição de Pagamento Ltda.">323 - Mercado Pago Instituição de Pagamento Ltda.</option>
+                            <option value="324 - Cartos Sociedade de Crédito Direto S.A.">324 - Cartos Sociedade de Crédito Direto S.A.</option>
+                            <option value="325 - Órama DTVM S.A.">325 - Órama DTVM S.A.</option>
+                            <option value="326 - Parcelex Serviços Financeiros S.A.">326 - Parcelex Serviços Financeiros S.A.</option>
+                            <option value="329 - Qi Sociedade de Crédito Direto S.A.">329 - Qi Sociedade de Crédito Direto S.A.</option>
+                            <option value="330 - Banco Bari de Investimentos e Financiamentos S.A.">330 - Banco Bari de Investimentos e Financiamentos S.A.</option>
+                            <option value="331 - Fram Capital DTVM S.A.">331 - Fram Capital DTVM S.A.</option>
+                            <option value="332 - Acesso Soluções de Pagamento S.A.">332 - Acesso Soluções de Pagamento S.A.</option>
+                            <option value="335 - Banco Digio S.A.">335 - Banco Digio S.A.</option>
+                            <option value="336 - Banco C6 S.A.">336 - Banco C6 S.A.</option>
+                            <option value="340 - Super Pagamentos e Administração de Meios Eletrônicos S.A.">340 - Super Pagamentos e Administração de Meios Eletrônicos S.A.</option>
+                            <option value="341 - Itaú Unibanco S.A.">341 - Itaú Unibanco S.A.</option>
+                            <option value="342 - Creditas Sociedade de Empréstimo entre Pessoas S.A.">342 - Creditas Sociedade de Empréstimo entre Pessoas S.A.</option>
+                            <option value="348 - Banco XP S.A.">348 - Banco XP S.A.</option>
+                            <option value="349 - AMAGGI S.A. Crédito, Financiamento e Investimento">349 - AMAGGI S.A. Crédito, Financiamento e Investimento</option>
+                            <option value="350 - Coopercard Administradora de Cartões Ltda.">350 - Coopercard Administradora de Cartões Ltda.</option>
+                            <option value="352 - Toro Corretora de Títulos e Valores Mobiliários Ltda.">352 - Toro Corretora de Títulos e Valores Mobiliários Ltda.</option>
+                            <option value="354 - Necton Investimentos S.A.">354 - Necton Investimentos S.A.</option>
+                            <option value="355 - Ótimo Sociedade de Crédito Direto S.A.">355 - Ótimo Sociedade de Crédito Direto S.A.</option>
+                            <option value="358 - Midway S.A. Crédito, Financiamento e Investimento">358 - Midway S.A. Crédito, Financiamento e Investimento</option>
+                            <option value="359 - Zema Crédito, Financiamento e Investimento S.A.">359 - Zema Crédito, Financiamento e Investimento S.A.</option>
+                            <option value="360 - Trinus Capital DTVM">360 - Trinus Capital DTVM</option>
+                            <option value="362 - Cielo S.A.">362 - Cielo S.A.</option>
+                            <option value="363 - Singulare Corretora de Títulos e Valores Mobiliários S.A.">363 - Singulare Corretora de Títulos e Valores Mobiliários S.A.</option>
+                            <option value="364 - Gerencianet Pagamentos do Brasil Ltda.">364 - Gerencianet Pagamentos do Brasil Ltda.</option>
+                            <option value="365 - Solidus S.A. Corretora de Câmbio e Valores Mobiliários">365 - Solidus S.A. Corretora de Câmbio e Valores Mobiliários</option>
+                            <option value="366 - Banco Société Générale Brasil S.A.">366 - Banco Société Générale Brasil S.A.</option>
+                            <option value="367 - Vitreo DTVM S.A.">367 - Vitreo DTVM S.A.</option>
+                            <option value="370 - Banco Mizuho do Brasil S.A.">370 - Banco Mizuho do Brasil S.A.</option>
+                            <option value="373 - Up.P Sociedade de Empréstimo entre Pessoas S.A.">373 - Up.P Sociedade de Empréstimo entre Pessoas S.A.</option>
+                            <option value="374 - Realize Crédito, Financiamento e Investimento S.A.">374 - Realize Crédito, Financiamento e Investimento S.A.</option>
+                            <option value="376 - Banco J. P. Morgan S.A.">376 - Banco J. P. Morgan S.A.</option>
+                            <option value="377 - MS Sociedade de Crédito Direto S.A.">377 - MS Sociedade de Crédito Direto S.A.</option>
+                            <option value="378 - BBC Leasing S.A.">378 - BBC Leasing S.A.</option>
+                            <option value="379 - Banco Cora S.A.">379 - Banco Cora S.A.</option>
+                            <option value="380 - PicPay Serviços S.A.">380 - PicPay Serviços S.A.</option>
+                            <option value="381 - Dock Instituição de Pagamento S.A.">381 - Dock Instituição de Pagamento S.A.</option>
+                            <option value="382 - Fidúcia Sociedade de Crédito ao Microempreendedor">382 - Fidúcia Sociedade de Crédito ao Microempreendedor</option>
+                            <option value="383 - Juno Sociedade de Crédito Direto S.A.">383 - Juno Sociedade de Crédito Direto S.A.</option>
+                            <option value="384 - Global SCM Sociedade de Crédito ao Microempreendedor">384 - Global SCM Sociedade de Crédito ao Microempreendedor</option>
+                            <option value="386 - Nu Financeira S.A.">386 - Nu Financeira S.A.</option>
+                            <option value="389 - Banco Mercantil do Brasil S.A.">389 - Banco Mercantil do Brasil S.A.</option>
+                            <option value="390 - Banco GM S.A.">390 - Banco GM S.A.</option>
+                            <option value="391 - Cooperativa de Crédito Rural de Ibiam">391 - Cooperativa de Crédito Rural de Ibiam</option>
+                            <option value="393 - Banco Volkswagen S.A.">393 - Banco Volkswagen S.A.</option>
+                            <option value="394 - Banco Bradesco Financiamentos S.A.">394 - Banco Bradesco Financiamentos S.A.</option>
+                            <option value="396 - Hub Pagamentos S.A.">396 - Hub Pagamentos S.A.</option>
+                            <option value="397 - Listo Sociedade de Crédito Direto S.A.">397 - Listo Sociedade de Crédito Direto S.A.</option>
+                            <option value="398 - Idez Instituição de Pagamento S.A.">398 - Idez Instituição de Pagamento S.A.</option>
+                            <option value="399 - Kirton Bank S.A. / HSBC Brasil">399 - Kirton Bank S.A. / HSBC Brasil</option>
+                            <option value="400 - COOPAG Credito">400 - COOPAG Credito</option>
+                            <option value="401 - Iugu Instituição de Pagamento S.A.">401 - Iugu Instituição de Pagamento S.A.</option>
+                            <option value="402 - Cobuccio Sociedade de Crédito Direto S.A.">402 - Cobuccio Sociedade de Crédito Direto S.A.</option>
+                            <option value="403 - Cora Sociedade de Crédito Direto S.A.">403 - Cora Sociedade de Crédito Direto S.A.</option>
+                            <option value="404 - Sumup Sociedade de Crédito Direto S.A.">404 - Sumup Sociedade de Crédito Direto S.A.</option>
+                            <option value="406 - Accredito Sociedade de Crédito Direto S.A.">406 - Accredito Sociedade de Crédito Direto S.A.</option>
+                            <option value="407 - Íris Sociedade de Crédito Direto S.A.">407 - Íris Sociedade de Crédito Direto S.A.</option>
+                            <option value="408 - Bônuscred Sociedade de Crédito Direto S.A.">408 - Bônuscred Sociedade de Crédito Direto S.A.</option>
+                            <option value="412 - Banco Capital S.A.">412 - Banco Capital S.A.</option>
+                            <option value="413 - Banco BV S.A.">413 - Banco BV S.A.</option>
+                            <option value="414 - Banco Caixa Geral Brasil S.A.">414 - Banco Caixa Geral Brasil S.A.</option>
+                            <option value="422 - Banco Safra S.A.">422 - Banco Safra S.A.</option>
+                            <option value="456 - Banco MUFG Brasil S.A.">456 - Banco MUFG Brasil S.A.</option>
+                            <option value="464 - Banco Sumitomo Mitsui Brasileiro S.A.">464 - Banco Sumitomo Mitsui Brasileiro S.A.</option>
+                            <option value="473 - Banco Caixa Geral Brasil S.A.">473 - Banco Caixa Geral Brasil S.A.</option>
+                            <option value="477 - Citibank N.A.">477 - Citibank N.A.</option>
+                            <option value="479 - Banco ItauBank S.A.">479 - Banco ItauBank S.A.</option>
+                            <option value="487 - Deutsche Bank S.A.">487 - Deutsche Bank S.A.</option>
+                            <option value="488 - JPMorgan Chase Bank, National Association">488 - JPMorgan Chase Bank, National Association</option>
+                            <option value="492 - ING Bank N.V.">492 - ING Bank N.V.</option>
+                            <option value="494 - Banco de La República Oriental del Uruguay">494 - Banco de La República Oriental del Uruguay</option>
+                            <option value="495 - Banco de La Provincia de Buenos Aires">495 - Banco de La Provincia de Buenos Aires</option>
+                            <option value="505 - Banco Credit Suisse (Brasil) S.A.">505 - Banco Credit Suisse (Brasil) S.A.</option>
+                            <option value="506 - Banco UBS Brasil S.A.">506 - Banco UBS Brasil S.A.</option>
+                            <option value="536 - Neon Pagamentos S.A.">536 - Neon Pagamentos S.A.</option>
+                            <option value="545 - Senso Corretora de Câmbio e Valores Mobiliários S.A.">545 - Senso Corretora de Câmbio e Valores Mobiliários S.A.</option>
+                            <option value="600 - Banco Luso Brasileiro S.A.">600 - Banco Luso Brasileiro S.A.</option>
+                            <option value="604 - Banco Industrial do Brasil S.A.">604 - Banco Industrial do Brasil S.A.</option>
+                            <option value="610 - Banco VR S.A.">610 - Banco VR S.A.</option>
+                            <option value="611 - Banco Paulista S.A.">611 - Banco Paulista S.A.</option>
+                            <option value="612 - Banco Guanabara S.A.">612 - Banco Guanabara S.A.</option>
+                            <option value="613 - Omni Banco S.A.">613 - Omni Banco S.A.</option>
+                            <option value="623 - Banco Pan S.A.">623 - Banco Pan S.A.</option>
+                            <option value="626 - Banco Ficsa S.A.">626 - Banco Ficsa S.A.</option>
+                            <option value="630 - Banco Smartbank S.A.">630 - Banco Smartbank S.A.</option>
+                            <option value="633 - Banco Rendimento S.A.">633 - Banco Rendimento S.A.</option>
+                            <option value="634 - Banco Triângulo S.A.">634 - Banco Triângulo S.A.</option>
+                            <option value="637 - Banco Sofisa S.A.">637 - Banco Sofisa S.A.</option>
+                            <option value="643 - Banco Pine S.A.">643 - Banco Pine S.A.</option>
+                            <option value="652 - Itaú Unibanco Holding S.A.">652 - Itaú Unibanco Holding S.A.</option>
+                            <option value="653 - Banco Indusval S.A.">653 - Banco Indusval S.A.</option>
+                            <option value="654 - Banco A.J. Renner S.A.">654 - Banco A.J. Renner S.A.</option>
+                            <option value="655 - Banco Votorantim S.A.">655 - Banco Votorantim S.A.</option>
+                            <option value="707 - Banco Daycoval S.A.">707 - Banco Daycoval S.A.</option>
+                            <option value="712 - Banco Ourinvest S.A.">712 - Banco Ourinvest S.A.</option>
+                            <option value="720 - Banco Maxinvest S.A.">720 - Banco Maxinvest S.A.</option>
+                            <option value="735 - Banco Neon S.A.">735 - Banco Neon S.A.</option>
+                            <option value="739 - Banco Cetelem S.A.">739 - Banco Cetelem S.A.</option>
+                            <option value="741 - Banco Ribeirão Preto S.A.">741 - Banco Ribeirão Preto S.A.</option>
+                            <option value="743 - Banco Semear S.A.">743 - Banco Semear S.A.</option>
+                            <option value="745 - Banco Citibank S.A.">745 - Banco Citibank S.A.</option>
+                            <option value="746 - Banco Modal S.A.">746 - Banco Modal S.A.</option>
+                            <option value="747 - Banco Rabobank International Brasil S.A.">747 - Banco Rabobank International Brasil S.A.</option>
+                            <option value="748 - Banco Cooperativo Sicredi S.A.">748 - Banco Cooperativo Sicredi S.A.</option>
+                            <option value="751 - Scotiabank Brasil S.A.">751 - Scotiabank Brasil S.A.</option>
+                            <option value="752 - Banco BNP Paribas Brasil S.A.">752 - Banco BNP Paribas Brasil S.A.</option>
+                            <option value="753 - Novo Banco Continental S.A.">753 - Novo Banco Continental S.A.</option>
+                            <option value="754 - Banco Sistema S.A.">754 - Banco Sistema S.A.</option>
+                            <option value="755 - Bank of America Merrill Lynch Banco Múltiplo S.A.">755 - Bank of America Merrill Lynch Banco Múltiplo S.A.</option>
+                            <option value="756 - Banco Cooperativo Sicoob S.A.">756 - Banco Cooperativo Sicoob S.A.</option>
+                            <option value="757 - Banco Keb Hana do Brasil S.A.">757 - Banco Keb Hana do Brasil S.A.</option>
+                            <option value="Outro Banco">Outro Banco</option>
+                        </select>
+
+                        <label>CPF: <span style="color:red">*</span></label>
+                        <input type="text" id="cpf-deposito" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPFDeposito(this); verificarCPFDeposito();" onkeyup="verificarCPFDeposito();" onchange="salvarCabecalho()">
+                        <div id="erro-cpf-deposito" style="display:none; color:#dc3545; font-size:11px; font-weight:bold;">CPF INVÁLIDO!!!</div>
+                        <div id="erro-chave-pix" style="display:none; color:#dc3545; font-size:11px; font-weight:bold;">CHAVE PIX INVÁLIDA!!!</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; flex-direction: column;">
+                    <label style="margin:0; font-weight: bold;">Saldo Anterior (R$): <span style="color:red">*</span></label>
+                    <span style="font-size: 10px; color: #777; font-weight: normal;">(Se for negativo, colocar o sinal de -)</span>
+                </div>
+                <input type="number" id="saldo-anterior" step="0.01" style="width: 110px; text-align: center; font-weight: bold;" onchange="salvarCabecalho()" required>
+            </div>
+
+            <div class="linha-saldo" style="color: var(--verde-pos); margin-top: 10px;">
+                <span>Total Créditos WM:</span>
+                <span id="total-creditos">R$ 0,00</span>
+            </div>
+
+            <div class="linha-saldo" style="color: var(--vermelho-neg);">
+                <span>Total Débitos:</span>
+                <span id="total-gasto">R$ 0,00</span>
+            </div>
+
+            <div class="saldo-atual" id="saldo-atual-display">SALDO ATUAL: R$ 0,00</div>
+        </div>
+
+        <div class="formulario">
+            <label>Categoria: <span style="color:red">*</span></label>
+            <select id="categoria" required>
+                <option value="" disabled selected>-- SELECIONE A CATEGORIA --</option>
+                <option value="CRÉDITO WM CONSTRUÇÕES E MONTAGENS">CRÉDITO WM CONSTRUÇÕES E MONTAGENS</option>
+                <option value="Alimentação">Alimentação</option>
+                <option value="Hospedagem">Hospedagem</option>
+                <option value="Transporte">Transporte</option>
+                <option value="Combustível">Combustível</option>
+                <option value="Outras Despesas">Outras Despesas</option>
+            </select>
+
+            <label>Data: <span style="color:red">*</span></label>
+            <input type="date" id="data" required>
+
+            <label>Fornecedor: <span style="color:red">*</span></label>
+            <input type="text" id="fornecedor" placeholder="Ex: Posto Ipiranga, WM Construções e Montagens..." required>
+
+            <label>Descrição do Gasto/Crédito: <span style="color:red">*</span></label>
+            <input type="text" id="desc" placeholder="Ex: Gasto com almoço, Crédito WM, etc..." required>
+
+            <label>Valor (R$): <span style="color:red">*</span></label>
+            <input type="number" id="valor" step="0.01" placeholder="0.00" required>
+
+            <div style="background: #f9f9f9; padding: 10px; border-radius: 5px; border: 1px solid #eee;">
+                <label style="font-weight: bold;">Tipo de Documento Fiscal: <span style="color:red">*</span></label>
+                <select id="tipo-doc" required>
+                    <option value="">-- SELECIONE O DOCUMENTO --</option>
+                    <option value="🚨 SEM DOCUMENTO FISCAL (FALTANDO)">🚨 SEM DOCUMENTO FISCAL (FALTANDO)</option>
+                    <option value="NF-e - Nota Fiscal Eletrônica">NF-e - Nota Fiscal Eletrônica</option>
+                    <option value="NFC-e - Nota de Consumidor Eletrônica">NFC-e - Nota de Consumidor Eletrônica</option>
+                    <option value="NFS-e - Nota Fiscal de Serviço Eletrônica">NFS-e - Nota Fiscal de Serviço Eletrônica</option>
+                    <option value="CT-e - Conhecimento de Transporte">CT-e - Conhecimento de Transporte</option>
+                    <option value="MDF-e - Manifesto de Documentos Fiscais">MDF-e - Manifesto de Documentos Fiscais</option>
+                    <option value="BP-e - Bilhete de Passagem Eletrônico">BP-e - Bilhete de Passagem Eletrônico</option>
+                    <option value="CF-e / SAT - Cupom Fiscal Eletrônico">CF-e / SAT - Cupom Fiscal Eletrônico</option>
+                    <option value="NFA-e - Nota Fiscal Avulsa Eletrônica">NFA-e - Nota Fiscal Avulsa Eletrônica</option>
+                    <option value="Nota Fiscal de Produtor Rural">Nota Fiscal de Produtor Rural</option>
+                    <option value="Outros Documentos Fiscais">Outros Documentos Fiscais</option>
+                    <option value="RPA - Recibo de Pagamento a Autônomo">RPA - Recibo de Pagamento a Autônomo</option>
+                    <option value="Nota Promissória">Nota Promissória</option>
+                    <option value="Comprovante de Venda">Comprovante de Venda</option>
+                    <option value="Recibo">Recibo</option>
+                    <option value="Comanda">Comanda</option>
+                    <option value="Orçamento">Orçamento</option>            
+                </select>
+
+                <label>📸 Foto da Nota Fiscal: <span style="color:red">*</span></label>
+                <span style="font-size: 11px; color: #666; display: block; margin-bottom: 5px; font-style: italic;">Obrigatório: Tire a foto ou anexe o documento fiscal.</span>
+                <input type="file" id="foto-doc" accept="image/*" capture="environment" required>
+
+                <div style="margin-top: 10px;">
+                    <label style="font-size: 12px; margin-bottom: 3px;">Observação da Nota (Opcional):</label>
+                    <textarea id="obs-doc" rows="2" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-weight: normal; font-size: 12px;" placeholder="Ex: Nota rasurada, faltando carimbo..."></textarea>
+                </div>
+            </div>
+
+            <div style="background: #f9f9f9; padding: 10px; border-radius: 5px; border: 1px solid #eee; margin-top: 10px;">
+                <label style="font-weight: bold;">Forma de Pagamento: <span style="color:red">*</span></label>
+                <select id="forma-pagto" required>
+                    <option value="">-- SELECIONE A FORMA --</option>
+                    <option value="🚨 SEM COMPROVANTE PAGTO (FALTANDO)">🚨 SEM COMPROVANTE PAGTO (FALTANDO)</option>
+                    <option value="PIX">PIX</option>
+                    <option value="Cartão de Débito">Cartão de Débito</option>
+                    <option value="Cartão de Crédito">Cartão de Crédito</option>
+                    <option value="Boleto Bancário">Boleto Bancário</option>
+                    <option value="Transferência Bancária (TED/DOC)">Transferência Bancária (TED/DOC)</option>
+                    <option value="Depósito Bancário">Depósito Bancário</option>
+                    <option value="Cheque">Cheque</option>
+                    <option value="Vale / Voucher">Vale / Voucher (Alimentação, Refeição, etc.)</option>
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Outros">Outros</option>
+                </select>
+
+                <label>📸 Foto do Pagamento: <span style="color:red">*</span></label>
+                <span style="font-size: 11px; color: #666; display: block; margin-bottom: 5px; font-style: italic;">Obrigatório: Anexe o comprovante de pagamento.</span>
+                <input type="file" id="foto-pagto" accept="image/*" capture="environment" required>
+
+                <div style="margin-top: 10px;">
+                    <label style="font-size: 12px; margin-bottom: 3px;">Observação do Pagamento (Opcional):</label>
+                    <textarea id="obs-pagto" rows="2" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-weight: normal; font-size: 12px;" placeholder="Ex: Pagamento em dinheiro vivo, PIX feito na conta da esposa do dono, adiantamento..."></textarea>
+                </div>
+            </div>
+
+            <button class="btn-salvar" id="btn-salvar-principal" onclick="salvarDespesa()">➕ Salvar na Lista</button>
+            <button class="btn-ver-planilha" onclick="abrirPlanilha()">📊 Ver Planilha</button>
+        </div>
+
+        <div class="area-acoes">
+            <button class="btn-pausar" onclick="salvarPausar()">🚪 SAIR</button>
+            <button class="btn-whats" onclick="compartilharWhatsApp()">📲 COMPARTILHAR NO WHATSAPP</button>
+            <button class="btn-encerrar" onclick="solicitarSenhaAcao('encerrar')">🗑️ APAGAR TUDO E SAIR</button>
+            <button class="btn-whats" onclick="atualizarAppSeguro()" style="background-color: #34495e; margin-top: 5px;">🔄 ATUALIZAR APLICATIVO</button>
+        </div>
+    </div>
+
+    <div id="tela-planilha">
+        <button class="btn-voltar" onclick="voltarParaFormulario()" style="width: 100%; padding: 10px; margin-bottom: 10px; font-weight: bold; background: #555; color: white; border: none; border-radius: 5px; cursor: pointer;">⬅ Voltar para Lançamentos</button>
+
+        <div class="cabecalho-oficial" id="cabecalho-pdf">
+            <div class="cabecalho-topo">
+                <img src="LOGOTIPO.jpg" alt="WM" class="img-cabecalho">
+                <div class="texto-cabecalho">
+                    <h3>RELATÓRIO DE CAIXINHA</h3>
+                    <small id="print-data-emissao"></small>
+                    <small style="color:#888; margin-top:3px;">APARELHO ID: ID-MI9MGTZKE</small>
+                </div>
+                <img src="controladoria.jpg" onerror="this.onerror=null;this.src='Captura%20de%20tela%202026-02-13%20132630.jpg';" alt="Controladoria" class="img-cabecalho">
+            </div>
+            <div class="info-box">
+                <div class="info-coluna-relatorio">
+                    <span class="titulo-bloco">Identificação do Relatório</span>
+                    <strong>EMPRESA:</strong> WM CONSTRUÇÕES E MONTAGENS<br>
+                    <strong>AUDITOR:</strong> Anderson<br>
+                    <strong>GESTOR:</strong> <span id="print-gestor"></span><br>
+                    <strong>Nº DO CAIXINHA:</strong> <span id="print-num"></span>
+                </div>
+
+                <div class="info-coluna-relatorio">
+                    <span class="titulo-bloco">Dados para Depósito</span>
+                    <strong>TIPO DA CHAVE PIX:</strong> <span id="print-tipo-chave-pix"></span><br>
+                    <strong>CHAVE PIX:</strong> <span id="print-chave-pix-deposito"></span><br>
+                    <strong>BANCO:</strong> <span id="print-banco-deposito"></span><br>
+                    <strong>CPF:</strong> <span id="print-cpf-deposito"></span>
+                </div>
+
+                <div class="resumo-saldo-relatorio">
+                    <div><strong>Saldo Anterior:</strong><br><span id="print-anterior"></span></div>
+                    <div><strong>Créditos:</strong><br><span id="print-creditos" style="color:green"></span></div>
+                    <div><strong>Débitos:</strong><br><span id="print-debitos" style="color:red"></span></div>
+                    <div><strong>SALDO ATUAL:</strong><br><span id="print-final" style="font-weight:bold; font-size: 14px;"></span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabela-container">
+            <table id="tabela-dados">
+                <thead>
+                    <tr>
+                        <th>Categoria</th>
+                        <th>Data</th>
+                        <th>Fornecedor</th>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th>Anexos</th>
+                        <th class="col-acoes">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="corpo-tabela"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="modal-foto">
+        <img id="foto-ampliada" src="">
+        <button onclick="document.getElementById('modal-foto').style.display='none'" style="margin-top:10px; padding:10px; font-weight: bold; cursor:pointer;">Fechar Imagem</button>
+    </div>
+</div>
+
+
+<script>
+    // ==========================================================
+    // SENHA EMBUTIDA NO INDEX - V40
+    // Senha atual do app: wm2027
+    // Este bloco guarda o HASH SHA-256 camuflado em números.
+    // Para alterar futuramente:
+    // 1) gere o HASH SHA-256 da nova senha;
+    // 2) transforme o HASH em números no gerador;
+    // 3) substitua somente os números abaixo.
+    // ==========================================================
+    window.SENHA_MESTRA_CAMUFLADA = [97, 53, 55, 57, 56, 55, 99, 100, 52, 98, 56, 101, 99, 48, 99, 98, 101, 98, 50, 51, 50, 57, 52, 100, 52, 51, 50, 56, 52, 55, 57, 101, 100, 102, 102, 54, 51, 55, 102, 50, 56, 102, 56, 100, 100, 97, 57, 50, 102, 57, 56, 54, 97, 51, 102, 100, 56, 49, 51, 50, 57, 97, 56, 53];
+
+    function obterHashSenhaMestra() {
+        return window.SENHA_MESTRA_CAMUFLADA
+            .map(numero => String.fromCharCode(numero))
+            .join('');
+    }
+
+    window.HASH_SENHA_MESTRA = obterHashSenhaMestra();
+</script>
+
+<script>
+
+
+    // ==========================================
+    // BLOQUEIO TOTAL NO COMPUTADOR / DESKTOP
+    // Corrigido: não trava celular
+    // ==========================================
+    function detectarComputadorBloqueado() {
+        const ua = navigator.userAgent || '';
+        const largura = window.innerWidth || screen.width || 0;
+        const toque = navigator.maxTouchPoints || 0;
+        const ponteiroFino = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+        const ehCelular =
+            /Android|iPhone|iPad|iPod|Windows Phone|Mobi|Mobile/i.test(ua) ||
+            (toque > 0 && largura < 900);
+
+        return ponteiroFino && !ehCelular && largura >= 900;
+    }
+
+    function ativarBloqueioComputadorTotal() {
+        if (detectarComputadorBloqueado()) {
+            document.body.classList.add('computador-bloqueado');
+        } else {
+            document.body.classList.remove('computador-bloqueado');
+
+            document.querySelectorAll('#tela-login input, #tela-login button, #tela-login img, #modal-acao input, #modal-acao button, #modal-acao img').forEach(el => {
+                el.disabled = false;
+                el.removeAttribute('disabled');
+                el.style.pointerEvents = 'auto';
+                el.style.opacity = '1';
+            });
+        }
+    }
+
+    function limparCampoPiscando() {
+        document.querySelectorAll('.campo-piscando').forEach(el => el.classList.remove('campo-piscando'));
+    }
+
+    function avisarCampoObrigatorio(id, mensagem) {
+        limparCampoPiscando();
+
+        alert(mensagem);
+
+        const el = document.getElementById(id);
+        if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+            setTimeout(() => {
+                el.focus();
+                el.classList.add('campo-piscando');
+            }, 300);
+        }
+
+        return false;
+    }
+
+    function ativarLimpezaCampoPiscando() {
+        document.querySelectorAll('input, select, textarea').forEach(el => {
+            el.addEventListener('input', () => el.classList.remove('campo-piscando'));
+            el.addEventListener('change', () => el.classList.remove('campo-piscando'));
+        });
+    }
+
+    function validarCPFReal(valor) {
+        let cpf = (valor || '').replace(/\D/g, '');
+        if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+
+        let soma = 0;
+        let resto;
+
+        for (let i = 1; i <= 9; i++) {
+            soma += parseInt(cpf.substring(i - 1, i), 10) * (11 - i);
+        }
+
+        resto = (soma * 10) % 11;
+        if (resto === 10 || resto === 11) resto = 0;
+        if (resto !== parseInt(cpf.substring(9, 10), 10)) return false;
+
+        soma = 0;
+        for (let i = 1; i <= 10; i++) {
+            soma += parseInt(cpf.substring(i - 1, i), 10) * (12 - i);
+        }
+
+        resto = (soma * 10) % 11;
+        if (resto === 10 || resto === 11) resto = 0;
+        return resto === parseInt(cpf.substring(10, 11), 10);
+    }
+
+    function validarCNPJReal(valor) {
+        let cnpj = (valor || '').replace(/\D/g, '');
+        if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return false;
+
+        let tamanho = 12;
+        let numeros = cnpj.substring(0, tamanho);
+        let digitos = cnpj.substring(tamanho);
+        let soma = 0;
+        let pos = 5;
+
+        for (let i = 0; i < tamanho; i++) {
+            soma += parseInt(numeros.charAt(i), 10) * pos--;
+            if (pos < 2) pos = 9;
+        }
+
+        let resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+        if (resultado !== parseInt(digitos.charAt(0), 10)) return false;
+
+        tamanho = 13;
+        numeros = cnpj.substring(0, tamanho);
+        soma = 0;
+        pos = 6;
+
+        for (let i = 0; i < tamanho; i++) {
+            soma += parseInt(numeros.charAt(i), 10) * pos--;
+            if (pos < 2) pos = 9;
+        }
+
+        resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+        return resultado === parseInt(digitos.charAt(1), 10);
+    }
+
+    function mascaraCPFDeposito(i) {
+        let v = (i.value || '').replace(/\D/g, '').slice(0, 11);
+        v = v.replace(/(\d{3})(\d)/, "$1.$2");
+        v = v.replace(/(\d{3})(\d)/, "$1.$2");
+        v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+        i.value = v;
+    }
+
+    function mascaraCNPJDeposito(i) {
+        let v = (i.value || '').replace(/\D/g, '').slice(0, 14);
+        v = v.replace(/^(\d{2})(\d)/, "$1.$2");
+        v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+        v = v.replace(/\.(\d{3})(\d)/, ".$1/$2");
+        v = v.replace(/(\d{4})(\d)/, "$1-$2");
+        i.value = v;
+    }
+
+    function mascaraCelularPix(i) {
+        let v = (i.value || '').replace(/\D/g, '').slice(0, 11);
+
+        if (v.length <= 2) {
+            i.value = v ? "(" + v : "";
+            return;
+        }
+
+        if (v.length <= 6) {
+            i.value = "(" + v.slice(0, 2) + ") " + v.slice(2);
+            return;
+        }
+
+        if (v.length <= 10) {
+            i.value = "(" + v.slice(0, 2) + ") " + v.slice(2, 6) + "-" + v.slice(6);
+            return;
+        }
+
+        i.value = "(" + v.slice(0, 2) + ") " + v.slice(2, 7) + "-" + v.slice(7);
+    }
+
+    function verificarCPFDeposito() {
+        const input = document.getElementById('cpf-deposito');
+        const erro = document.getElementById('erro-cpf-deposito');
+        if (!input || !erro) return true;
+
+        const somenteNumeros = input.value.replace(/\D/g, '');
+
+        if (somenteNumeros.length === 0) {
+            erro.style.display = 'none';
+            input.style.border = '';
+            return true;
+        }
+
+        if (somenteNumeros.length >= 11 && !validarCPFReal(input.value)) {
+            erro.style.display = 'block';
+            input.style.border = '2px solid #dc3545';
+            return false;
+        }
+
+        erro.style.display = 'none';
+        input.style.border = '';
+        return true;
+    }
+
+    function formatarChavePix() {
+        const tipo = document.getElementById('tipo-chave-pix') ? document.getElementById('tipo-chave-pix').value : '';
+        const chave = document.getElementById('chave-pix-deposito');
+        if (!chave) return;
+
+        if (tipo === 'CPF') {
+            mascaraCPFDeposito(chave);
+        } else if (tipo === 'CNPJ') {
+            mascaraCNPJDeposito(chave);
+        } else if (tipo === 'CELULAR') {
+            mascaraCelularPix(chave);
+        }
+
+        validarChavePixVisual();
+    }
+
+    function ajustarCampoChavePix() {
+        const tipo = document.getElementById('tipo-chave-pix') ? document.getElementById('tipo-chave-pix').value : '';
+        const chave = document.getElementById('chave-pix-deposito');
+        if (!chave) return;
+
+        chave.value = '';
+        chave.classList.remove('campo-piscando');
+
+        if (tipo === 'CPF') {
+            chave.placeholder = 'Digite a chave CPF: 000.000.000-00';
+            chave.maxLength = 14;
+        } else if (tipo === 'CNPJ') {
+            chave.placeholder = 'Digite a chave CNPJ: 00.000.000/0000-00';
+            chave.maxLength = 18;
+        } else if (tipo === 'CELULAR') {
+            chave.placeholder = 'Digite a chave celular: (00) 00000-0000';
+            chave.maxLength = 15;
+        } else if (tipo === 'E-MAIL') {
+            chave.placeholder = 'Digite a chave e-mail';
+            chave.maxLength = 80;
+        } else if (tipo === 'CHAVE ALEATÓRIA') {
+            chave.placeholder = 'Digite a chave aleatória';
+            chave.maxLength = 100;
+        } else {
+            chave.placeholder = 'Digite a chave PIX conforme o tipo selecionado';
+            chave.maxLength = 100;
+        }
+
+        chave.oninput = formatarChavePix;
+        validarChavePixVisual();
+    }
+
+    function validarChavePix() {
+        const tipo = document.getElementById('tipo-chave-pix') ? document.getElementById('tipo-chave-pix').value : '';
+        const chave = document.getElementById('chave-pix-deposito') ? document.getElementById('chave-pix-deposito').value.trim() : '';
+
+        if (!tipo || !chave) return false;
+
+        if (tipo === 'CPF') return validarCPFReal(chave);
+        if (tipo === 'CNPJ') return validarCNPJReal(chave);
+        if (tipo === 'CELULAR') {
+            const n = chave.replace(/\D/g, '');
+            return n.length === 10 || n.length === 11;
+        }
+        if (tipo === 'E-MAIL') return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(chave);
+        if (tipo === 'CHAVE ALEATÓRIA') return chave.length >= 20;
+
+        return true;
+    }
+
+    function validarChavePixVisual() {
+        const erro = document.getElementById('erro-chave-pix');
+        const chave = document.getElementById('chave-pix-deposito');
+        if (!erro || !chave) return true;
+
+        if (!chave.value.trim()) {
+            erro.style.display = 'none';
+            return true;
+        }
+
+        if (!validarChavePix()) {
+            erro.style.display = 'block';
+            return false;
+        }
+
+        erro.style.display = 'none';
+        return true;
+    }
+
+    function validarDadosDeposito() {
+        const tipo = document.getElementById('tipo-chave-pix') ? document.getElementById('tipo-chave-pix').value : '';
+        const chave = document.getElementById('chave-pix-deposito') ? document.getElementById('chave-pix-deposito').value.trim() : '';
+        const banco = document.getElementById('banco-deposito') ? document.getElementById('banco-deposito').value : '';
+        const cpf = document.getElementById('cpf-deposito') ? document.getElementById('cpf-deposito').value : '';
+
+        if (!tipo) return avisarCampoObrigatorio('tipo-chave-pix', '⚠️ Atenção: selecione o Tipo da Chave PIX.');
+        if (!chave) return avisarCampoObrigatorio('chave-pix-deposito', '⚠️ Atenção: digite a Chave PIX.');
+
+        if (!validarChavePix()) {
+            const msg = tipo === 'CPF' ? '❌ Chave PIX CPF inválida.'
+                      : tipo === 'CNPJ' ? '❌ Chave PIX CNPJ inválida.'
+                      : tipo === 'CELULAR' ? '❌ Chave PIX celular inválida. Informe com DDD.'
+                      : tipo === 'E-MAIL' ? '❌ Chave PIX e-mail inválida.'
+                      : '❌ Chave PIX inválida.';
+            return avisarCampoObrigatorio('chave-pix-deposito', msg);
+        }
+
+        if (!banco) return avisarCampoObrigatorio('banco-deposito', '⚠️ Atenção: selecione o Banco.');
+        if (!cpf) return avisarCampoObrigatorio('cpf-deposito', '⚠️ Atenção: o CPF é obrigatório.');
+        if (!validarCPFReal(cpf)) return avisarCampoObrigatorio('cpf-deposito', '❌ CPF inválido.');
+
+        return true;
+    }
+
+    function nomeArquivoRelatorioCaixinha() {
+
+        const num = (document.getElementById('num-caixinha').value || 'SEM-NUMERO').replace(/[^\w\-]+/g, '-');
+        const data = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+        return `relatorio-caixinha-${num}-${data}.pdf`;
+    }
+
+    function carregarScriptHtml2Pdf() {
+        return new Promise((resolve, reject) => {
+            if (window.html2pdf) return resolve();
+
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    async function gerarArquivoPDFCaixinha() {
+        abrirPlanilha();
+        await new Promise(resolve => setTimeout(resolve, 600));
+
+        await carregarScriptHtml2Pdf();
+
+        const elemento = document.getElementById('tela-planilha');
+        document.body.classList.add('gerando-relatorio');
+
+        const opt = {
+            margin: 0.2,
+            filename: nomeArquivoRelatorioCaixinha(),
+            image: { type: 'jpeg', quality: 0.95 },
+            html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        try {
+            const blob = await html2pdf().set(opt).from(elemento).outputPdf('blob');
+            return new File([blob], nomeArquivoRelatorioCaixinha(), { type: 'application/pdf' });
+        } finally {
+            document.body.classList.remove('gerando-relatorio');
+        }
+    }
+
+    async function compartilharWhatsApp() {
+        if (!banco.length) {
+            alert('⚠️ Não há lançamentos para compartilhar.');
+            return;
+        }
+
+        try {
+            const arquivo = await gerarArquivoPDFCaixinha();
+
+            if (navigator.canShare && navigator.canShare({ files: [arquivo] })) {
+                await navigator.share({
+                    title: 'Relatório de Caixinha',
+                    text: 'Relatório de Caixinha - Controladoria',
+                    files: [arquivo]
+                });
+                return;
+            }
+
+            const urlArquivo = URL.createObjectURL(arquivo);
+            const link = document.createElement('a');
+            link.href = urlArquivo;
+            link.download = arquivo.name;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            alert('✅ PDF gerado. Agora compartilhe o arquivo pelo WhatsApp.');
+        } catch (e) {
+            console.error(e);
+            alert('⚠️ Não foi possível compartilhar automaticamente. Vou abrir a tela de impressão para salvar o PDF.');
+            abrirPlanilha();
+            setTimeout(() => window.print(), 800);
+        }
+    }
+
+    function toggleBodyScroll(lock) {
+        if (lock) { document.body.classList.add('no-scroll'); } 
+        else { document.body.classList.remove('no-scroll'); }
+    }
+
+    function focarErro(idOriginal, mensagem) {
+        return avisarCampoObrigatorio(idOriginal, mensagem);
+    }
+
+    function verificarAtalhos() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('tela') === 'planilha') {
+            abrirPlanilha(); 
+        }
+    }
+
+    const HASH_SENHA_MESTRA = window.HASH_SENHA_MESTRA || '';
+
+
+    let acaoPendente = '';
+
+    function inicializarAppOffline() {
+        ativarBloqueioComputadorTotal();
+        if (localStorage.getItem('wm_sessao_ativa') === 'true') {
+            document.getElementById('tela-login').style.display = 'none';
+            toggleBodyScroll(false); 
+            if (document.getElementById('tela-planilha').style.display !== 'block') {
+                document.getElementById('tela-principal').style.display = 'block';
+            }
+        } else {
+            document.getElementById('tela-principal').style.display = 'none';
+            document.getElementById('tela-planilha').style.display = 'none';
+            document.getElementById('tela-login').style.display = 'flex';
+            toggleBodyScroll(true); 
+        }
+
+        calcularSaldo();
+        document.body.offsetHeight; 
+        verificarAtalhos(); 
+    }
+
+    document.addEventListener('DOMContentLoaded', ativarBloqueioComputadorTotal);
+    document.addEventListener('DOMContentLoaded', ativarLimpezaCampoPiscando);
+    
+    // ==========================================
+    // OFFLINE PERMANENTE - SERVICE WORKER V40
+    // Registra automaticamente ao abrir o app.
+    // Depois do primeiro carregamento com internet,
+    // o app abre offline mesmo sem salvar lançamento.
+    // ==========================================
+    function registrarServiceWorkerOffline() {
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./sw.js?v=40')
+                    .then(function(reg) {
+                        console.log('✅ App Caixinha offline ativo:', reg.scope);
+                    })
+                    .catch(function(err) {
+                        console.warn('⚠️ Falha ao ativar offline:', err);
+                    });
+            });
+        }
+    }
+
+    registrarServiceWorkerOffline();
+
+    async function existeInternetRealCaixinha() {
+        if (!navigator.onLine) return false;
+
+        try {
+            const controlador = new AbortController();
+            const tempoLimite = setTimeout(function() {
+                controlador.abort();
+            }, 8000);
+
+            // HEAD não é interceptado pelo service worker deste app.
+            // Assim o teste confirma internet real e não uma cópia salva no cache.
+            const resposta = await fetch('./index.html?teste_online=' + Date.now(), {
+                method: 'HEAD',
+                cache: 'no-store',
+                signal: controlador.signal
+            });
+
+            clearTimeout(tempoLimite);
+            return !!(resposta && resposta.ok);
+        } catch (erro) {
+            return false;
+        }
+    }
+
+    async function atualizarAppSeguro() {
+        if (window.__atualizandoAppCaixinha) return;
+
+        if (!confirm("Deseja buscar a versão mais recente do aplicativo? (Seus dados salvos NÃO serão perdidos)")) {
+            return;
+        }
+
+        const botaoAtualizar =
+            document.querySelector('button[onclick="atualizarAppSeguro()"]') ||
+            document.querySelector('button[onclick="atualizarAplicativo()"]');
+
+        const textoOriginal = botaoAtualizar ? botaoAtualizar.innerHTML : '🔄 ATUALIZAR APLICATIVO';
+
+        const restaurarBotao = function() {
+            if (botaoAtualizar) {
+                botaoAtualizar.disabled = false;
+                botaoAtualizar.innerHTML = textoOriginal;
+                botaoAtualizar.style.opacity = '1';
+            }
+            window.__atualizandoAppCaixinha = false;
+        };
+
+        window.__atualizandoAppCaixinha = true;
+
+        if (botaoAtualizar) {
+            botaoAtualizar.disabled = true;
+            botaoAtualizar.innerHTML = '⏳ VERIFICANDO INTERNET...';
+            botaoAtualizar.style.opacity = '0.7';
+        }
+
+        const internetOk = await existeInternetRealCaixinha();
+
+        if (!internetOk) {
+            alert("📴 Sem internet no momento. Nada foi apagado e o app offline foi preservado. Abra com internet para atualizar.");
+            restaurarBotao();
+            return;
+        }
+
+        try {
+            if (botaoAtualizar) {
+                botaoAtualizar.innerHTML = '⏳ ATUALIZANDO CACHE...';
+            }
+
+            if ('serviceWorker' in navigator) {
+                const registro = await navigator.serviceWorker.register('./sw.js?v=40');
+                if (registro && registro.update) {
+                    await registro.update();
+                }
+            }
+
+            // Não apaga o cache manualmente. O novo sw.js troca o cache com segurança.
+            // Isso evita a tela preta "App offline indisponível" quando o celular está sem internet.
+            window.location.href = window.location.pathname + '?atualizar=' + Date.now();
+
+        } catch (erro) {
+            console.warn('Falha ao atualizar app:', erro);
+            alert("⚠️ Não foi possível buscar a nova versão agora. O app offline antigo continua preservado.");
+            restaurarBotao();
+        }
+    }
+
+    function atualizarAplicativo() {
+        atualizarAppSeguro();
+    }
+
+    document.addEventListener('DOMContentLoaded', inicializarAppOffline);
+    window.addEventListener('pageshow', function(event) { inicializarAppOffline(); });
+    window.addEventListener('popstate', function(event) { inicializarAppOffline(); }); 
+
+    async function gerarHash(texto) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(texto);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+    }
+
+    async function validarAcesso() {
+        const senhaDigitada = document.getElementById('senha-input').value;
+        const hashDigitado = await gerarHash(senhaDigitada);
+
+        if (hashDigitado === HASH_SENHA_MESTRA) {
+            localStorage.setItem('wm_sessao_ativa', 'true');
+            document.getElementById('tela-login').style.display = 'none';
+            document.getElementById('tela-principal').style.display = 'block';
+            document.getElementById('senha-input').value = ''; 
+            document.getElementById('erro-login').style.display = 'none';
+            toggleBodyScroll(false); 
+        } else {
+            document.getElementById('erro-login').style.display = 'block';
+        }
+    }
+
+    function mostrarSenha() {
+        let input = document.getElementById('senha-input');
+        let icone = document.getElementById('icone-olho');
+
+        if (input.type === 'password') {
+            input.type = 'text'; 
+            icone.src = 'OLHOABERTO.png'; 
+        } else {
+            input.type = 'password'; 
+            icone.src = 'OLHOFECHADO_V2.png'; 
+        }
+    }
+
+    function salvarPausar() {
+        localStorage.removeItem('wm_sessao_ativa'); 
+        document.getElementById('tela-principal').style.display = 'none';
+        document.getElementById('tela-planilha').style.display = 'none';
+        document.getElementById('tela-login').style.display = 'flex'; 
+        document.getElementById('senha-input').value = ''; 
+        toggleBodyScroll(true); 
+        alert('✅ Sessão pausada com sucesso. Você saiu do aplicativo!');
+    }
+
+    function solicitarSenhaAcao(acao) {
+        acaoPendente = acao;
+        document.getElementById('senha-acao-input').value = '';
+        document.getElementById('erro-senha-acao').style.display = 'none';
+        document.getElementById('modal-acao').style.display = 'flex';
+        toggleBodyScroll(true); 
+
+        if(acao === 'encerrar') {
+            document.getElementById('texto-acao-modal').innerText = "Senha necessária para apagar tudo e sair";
+        }
+    }
+
+    function fecharModalAcao() {
+        document.getElementById('modal-acao').style.display = 'none';
+        acaoPendente = '';
+        toggleBodyScroll(false); 
+    }
+
+    function mostrarSenhaAcao() {
+        let input = document.getElementById('senha-acao-input');
+        let icone = document.getElementById('icone-olho-acao');
+        if (input.type === 'password') { input.type = 'text'; icone.src = 'OLHOABERTO.png'; } 
+        else { input.type = 'password'; icone.src = 'OLHOFECHADO_V2.png'; }
+    }
+
+    async function validarSenhaAcao() {
+        const senhaDigitada = document.getElementById('senha-acao-input').value;
+        const hashDigitado = await gerarHash(senhaDigitada);
+
+        if (hashDigitado === HASH_SENHA_MESTRA) {
+            document.getElementById('modal-acao').style.display = 'none';
+            toggleBodyScroll(false); 
+
+            if (acaoPendente === 'encerrar') {
+                encerrarCaixinha();
+            }
+            acaoPendente = '';
+        } else {
+            document.getElementById('erro-senha-acao').style.display = 'block';
+        }
+    }
+
+    document.getElementById('data').valueAsDate = new Date();
+    let banco = JSON.parse(localStorage.getItem('wm_despesas')) || [];
+    let indiceEdicao = -1; 
+
+    function salvarCabecalho() {
+        const cpfDepositoAtual = document.getElementById('cpf-deposito') ? document.getElementById('cpf-deposito').value : '';
+        if (cpfDepositoAtual.replace(/\D/g, '').length > 0 && !verificarCPFDeposito()) {
+            alert('❌ CPF dos dados para depósito inválido! Confira o número informado.');
+            return;
+        }
+        localStorage.setItem('wm_num', document.getElementById('num-caixinha').value);
+        localStorage.setItem('wm_gestor', document.getElementById('nome-gestor').value);
+        localStorage.setItem('wm_anterior', document.getElementById('saldo-anterior').value);
+        localStorage.setItem('wm_tipo_chave_pix', document.getElementById('tipo-chave-pix').value);
+        localStorage.setItem('wm_chave_pix_deposito', document.getElementById('chave-pix-deposito').value);
+        localStorage.setItem('wm_banco_deposito', document.getElementById('banco-deposito').value);
+        localStorage.setItem('wm_cpf_deposito', document.getElementById('cpf-deposito').value);
+        calcularSaldo();
+    }
+
+    function calcularSaldo() {
+        let inputAnterior = document.getElementById('saldo-anterior');
+        let ant = parseFloat(inputAnterior.value) || 0;
+
+        if (ant >= 0) {
+            inputAnterior.className = "positivo";
+        } else {
+            inputAnterior.className = "negativo";
+        }
+
+        let cred = banco.filter(i => i.categoria.includes('CRÉDITO')).reduce((s, i) => s + i.valor, 0);
+        let deb = banco.filter(i => !i.categoria.includes('CRÉDITO')).reduce((s, i) => s + i.valor, 0);
+        let total = ant + cred - deb;
+
+        document.getElementById('total-creditos').innerText = cred.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        document.getElementById('total-gasto').innerText = deb.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        let display = document.getElementById('saldo-atual-display');
+        display.innerText = "SALDO ATUAL: " + total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        display.className = total >= 0 ? "saldo-atual positivo" : "saldo-atual negativo";
+    }
+
+    function comprimirImagem(file) {
+        return new Promise((resolve) => {
+            if (!file) { resolve(null); return; }
+            let reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(event) {
+                let img = new Image();
+                img.src = event.target.result;
+                img.onload = function() {
+                    let canvas = document.createElement('canvas');
+                    let ctx = canvas.getContext('2d');
+                    let MAX_WIDTH = 600;
+                    let MAX_HEIGHT = 600;
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > height) {
+                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    } else {
+                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.6));
+                }
+            }
+        });
+    }
+
+
+    function salvarBancoCaixinha() {
+        try {
+            localStorage.setItem('wm_despesas', JSON.stringify(banco));
+            return true;
+        } catch (e) {
+            console.error('Erro ao salvar lista:', e);
+            alert('❌ Não foi possível salvar a lista. A memória do celular pode estar cheia por causa das fotos.');
+            return false;
+        }
+    }
+
+    async function salvarDespesa() {
+        let numCaixinha = document.getElementById('num-caixinha').value;
+        let gestor = document.getElementById('nome-gestor').value;
+        let saldoAnterior = document.getElementById('saldo-anterior').value;
+
+        if(!numCaixinha) return focarErro('num-caixinha', "⚠️ Atenção: Preencha o Nº do Caixinha!");
+        if(!gestor) return focarErro('nome-gestor', "⚠️ Atenção: Preencha o Nome do Gestor!");
+        if(saldoAnterior === "") return focarErro('saldo-anterior', "⚠️ Atenção: Preencha o Saldo Anterior!");
+
+        if (!validarDadosDeposito()) return;
+
+        let categoria = document.getElementById('categoria').value;
+        if(!categoria) return focarErro('categoria', "⚠️ Atenção: Selecione a Categoria!");
+
+        let dataStr = document.getElementById('data').value;
+        if(!dataStr) return focarErro('data', "⚠️ Atenção: Preencha a Data!");
+
+        let fornecedor = document.getElementById('fornecedor').value;
+        if(!fornecedor) return focarErro('fornecedor', "⚠️ Atenção: Preencha o Fornecedor!");
+
+        let desc = document.getElementById('desc').value;
+        if(!desc) return focarErro('desc', "⚠️ Atenção: Preencha a Descrição do Gasto/Crédito!");
+
+        let valorInput = document.getElementById('valor').value;
+        if(!valorInput) return focarErro('valor', "⚠️ Atenção: Preencha o Valor!");
+
+        let tipoDoc = document.getElementById('tipo-doc').value;
+        if(!tipoDoc) return focarErro('tipo-doc', "⚠️ Atenção: Selecione o Tipo de Documento Fiscal!");
+
+        let fotoDocFile = document.getElementById('foto-doc').files[0];
+        if (indiceEdicao === -1 && !fotoDocFile) return focarErro('foto-doc', "⚠️ Atenção: É obrigatório anexar a Foto da Nota Fiscal!");
+
+        let formaPagto = document.getElementById('forma-pagto').value;
+        if(!formaPagto) return focarErro('forma-pagto', "⚠️ Atenção: Selecione a Forma de Pagamento!");
+
+        let fotoPagtoFile = document.getElementById('foto-pagto').files[0];
+        if (indiceEdicao === -1 && !fotoPagtoFile) return focarErro('foto-pagto', "⚠️ Atenção: É obrigatório anexar a Foto do Pagamento!");
+
+        let valor = parseFloat(valorInput);
+
+        document.getElementById('btn-salvar-principal').innerText = "⏳ Processando...";
+        let fDoc = await comprimirImagem(fotoDocFile);
+        let fPag = await comprimirImagem(fotoPagtoFile);
+
+        let obsDoc = document.getElementById('obs-doc').value;
+        let obsPagto = document.getElementById('obs-pagto').value;
+
+        let item = {
+            categoria: categoria,
+            data: dataStr.split('-').reverse().join('/'),
+            fornecedor: fornecedor,
+            descricao: desc,
+            valor: valor,
+            tipoDoc: tipoDoc,
+            formaPagto: formaPagto,
+            fotoDoc: fDoc,
+            fotoPagto: fPag,
+            obsDoc: obsDoc,      
+            obsPagto: obsPagto  
+        };
+
+        if (indiceEdicao >= 0) {
+            if (!item.fotoDoc) item.fotoDoc = banco[indiceEdicao].fotoDoc;
+            if (!item.fotoPagto) item.fotoPagto = banco[indiceEdicao].fotoPagto;
+            banco[indiceEdicao] = item;
+            indiceEdicao = -1; 
+            document.getElementById('btn-salvar-principal').innerText = "➕ Salvar na Lista";
+        } else {
+            banco.push(item);
+        }
+
+        try {
+            if (!salvarBancoCaixinha()) return;
+            document.getElementById('categoria').selectedIndex = 0;
+            document.getElementById('desc').value = ''; 
+            document.getElementById('valor').value = ''; 
+            document.getElementById('fornecedor').value = '';
+            document.getElementById('foto-doc').value = ''; 
+            document.getElementById('foto-pagto').value = '';
+            document.getElementById('obs-doc').value = '';     
+            document.getElementById('obs-pagto').value = '';   
+            document.getElementById('tipo-doc').selectedIndex = 0;
+            document.getElementById('forma-pagto').selectedIndex = 0;
+            document.getElementById('btn-salvar-principal').innerText = "➕ Salvar na Lista";
+            calcularSaldo(); 
+            alert("✔️ Lançamento Salvo!");
+        } catch (e) {
+            alert("❌ Memória cheia! Exclua itens antigos ou encerre o caixinha.");
+            document.getElementById('btn-salvar-principal').innerText = "➕ Salvar na Lista";
+        }
+    }
+
+    function abrirPlanilha() {
+        document.getElementById('tela-principal').style.display = 'none';
+        document.getElementById('tela-planilha').style.display = 'block';
+
+        document.getElementById('print-num').innerText = document.getElementById('num-caixinha').value || "Não informado";
+        document.getElementById('print-gestor').innerText = document.getElementById('nome-gestor').value || "Não informado";
+        document.getElementById('print-tipo-chave-pix').innerText = document.getElementById('tipo-chave-pix').value || "Não informado";
+        document.getElementById('print-chave-pix-deposito').innerText = document.getElementById('chave-pix-deposito').value || "Não informado";
+        document.getElementById('print-banco-deposito').innerText = document.getElementById('banco-deposito').value || "Não informado";
+        document.getElementById('print-cpf-deposito').innerText = document.getElementById('cpf-deposito').value || "Não informado";
+
+        let ant = parseFloat(document.getElementById('saldo-anterior').value) || 0;
+        let printAnterior = document.getElementById('print-anterior');
+        printAnterior.innerText = ant.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        printAnterior.className = ant >= 0 ? "positivo" : "negativo";
+
+        document.getElementById('print-creditos').innerText = document.getElementById('total-creditos').innerText;
+        document.getElementById('print-debitos').innerText = document.getElementById('total-gasto').innerText;
+
+        let displayAtual = document.getElementById('saldo-atual-display');
+        let printFinal = document.getElementById('print-final');
+        printFinal.innerText = displayAtual.innerText.replace("SALDO ATUAL: ","");
+        printFinal.className = displayAtual.className.includes('positivo') ? "positivo" : "negativo";
+
+        document.getElementById('print-data-emissao').innerText = "Emitido em: " + new Date().toLocaleDateString() + " às " + new Date().toLocaleTimeString();
+
+        let corpo = document.getElementById('corpo-tabela'); 
+        corpo.innerHTML = "";
+        banco.forEach((item, index) => {
+            let fHTML = `<div style="display:flex; flex-direction:row; gap:10px; justify-content:center; align-items:flex-start;">`;
+            if(item.fotoDoc) fHTML += `<div class="anexo-box"><span class="legenda-foto">${item.tipoDoc}</span><img src="${item.fotoDoc}" class="foto-miniatura" onclick="verFoto('${item.fotoDoc}')"></div>`;
+            if(item.fotoPagto) fHTML += `<div class="anexo-box"><span class="legenda-foto">${item.formaPagto}</span><img src="${item.fotoPagto}" class="foto-miniatura" onclick="verFoto('${item.fotoPagto}')"></div>`;
+            fHTML += `</div>`;
+
+            corpo.innerHTML += `<tr>
+                <td>${item.categoria}</td>
+                <td>${item.data}</td>
+                <td>${item.fornecedor}</td>
+                <td>${item.descricao}</td>
+                <td style="white-space:nowrap; font-weight:bold;">R$ ${item.valor.toFixed(2)}</td>
+                <td>${fHTML || '---'}</td>
+                <td class="col-acoes" style="text-align:center;">
+                    <button onclick="editar(${index})" style="background:orange; color:white; border:none; padding:8px; border-radius:3px; cursor:pointer; margin-bottom:5px; width: 100%;">✏️ Editar</button>
+                    <button onclick="excluir(${index})" style="background:red; color:white; border:none; padding:8px; border-radius:3px; cursor:pointer; width: 100%;">🗑️ Excluir</button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    function voltarParaFormulario() { document.getElementById('tela-planilha').style.display = 'none'; document.getElementById('tela-principal').style.display = 'block'; }
+    function verFoto(src) { document.getElementById('foto-ampliada').src = src; document.getElementById('modal-foto').style.display = 'flex'; }
+
+    function editar(index) {
+        let it = banco[index];
+        document.getElementById('categoria').value = it.categoria;
+        document.getElementById('data').value = it.data.split('/').reverse().join('-');
+        document.getElementById('fornecedor').value = it.fornecedor;
+        document.getElementById('desc').value = it.descricao;
+        document.getElementById('valor').value = it.valor;
+        document.getElementById('tipo-doc').value = it.tipoDoc;
+        document.getElementById('forma-pagto').value = it.formaPagto;
+        document.getElementById('obs-doc').value = it.obsDoc || "";       
+        document.getElementById('obs-pagto').value = it.obsPagto || "";   
+        indiceEdicao = index;
+        document.getElementById('btn-salvar-principal').innerText = "💾 Atualizar Lançamento";
+        voltarParaFormulario();
+    }
+
+    function excluir(index) { if(confirm("Excluir definitivamente?")) { banco.splice(index,1); if (!salvarBancoCaixinha()) return; abrirPlanilha(); calcularSaldo(); } }
+    function gerarPDF() { compartilharWhatsApp(); }
+
+    function encerrarCaixinha() { 
+        if(confirm("Zerar tudo? Você perderá todos os dados não enviados!")) { 
+
+            localStorage.removeItem('wm_despesas'); 
+            localStorage.removeItem('wm_sessao_ativa'); 
+            localStorage.removeItem('wm_num');
+            localStorage.removeItem('wm_gestor');
+            localStorage.removeItem('wm_anterior');
+            localStorage.removeItem('wm_tipo_chave_pix');
+            localStorage.removeItem('wm_chave_pix_deposito');
+            localStorage.removeItem('wm_banco_deposito');
+            localStorage.removeItem('wm_cpf_deposito');
+
+            banco = [];
+            indiceEdicao = -1;
+            document.getElementById('corpo-tabela').innerHTML = "";
+
+            document.getElementById('num-caixinha').value = '';
+            document.getElementById('nome-gestor').value = '';
+            document.getElementById('saldo-anterior').value = '';
+            document.getElementById('tipo-chave-pix').value = '';
+            document.getElementById('chave-pix-deposito').value = '';
+            document.getElementById('banco-deposito').value = '';
+            document.getElementById('cpf-deposito').value = '';
+            document.getElementById('categoria').selectedIndex = 0;
+            document.getElementById('desc').value = ''; 
+            document.getElementById('valor').value = ''; 
+            document.getElementById('fornecedor').value = '';
+            document.getElementById('foto-doc').value = ''; 
+            document.getElementById('foto-pagto').value = '';
+            document.getElementById('obs-doc').value = ''; 
+            document.getElementById('obs-pagto').value = ''; 
+            document.getElementById('tipo-doc').selectedIndex = 0;
+            document.getElementById('forma-pagto').selectedIndex = 0;
+
+            calcularSaldo();
+
+            document.getElementById('tela-principal').style.display = 'none';
+            document.getElementById('tela-planilha').style.display = 'none';
+            document.getElementById('tela-login').style.display = 'flex';
+            toggleBodyScroll(true); 
+
+            document.getElementById('senha-input').value = '';
+            document.getElementById('erro-login').style.display = 'none';
+
+            alert("✅ Caixinha encerrado, dados e sessão apagados com sucesso!");
+        } 
+    }
+    document.getElementById('num-caixinha').value = localStorage.getItem('wm_num') || '';
+    document.getElementById('nome-gestor').value = localStorage.getItem('wm_gestor') || '';
+    document.getElementById('saldo-anterior').value = localStorage.getItem('wm_anterior') || '';
+    document.getElementById('tipo-chave-pix').value = localStorage.getItem('wm_tipo_chave_pix') || '';
+    document.getElementById('chave-pix-deposito').value = localStorage.getItem('wm_chave_pix_deposito') || '';
+    document.getElementById('banco-deposito').value = localStorage.getItem('wm_banco_deposito') || '';
+    document.getElementById('cpf-deposito').value = localStorage.getItem('wm_cpf_deposito') || '';
+    ajustarCampoChavePix();
+    verificarCPFDeposito();
+    calcularSaldo();
+
+    // Service Worker V40 ativo: atualização segura, offline preservado e sem tela preta.
+</script>
+</body>
+</html>
